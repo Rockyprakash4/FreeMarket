@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+
+{% block title %}DevMarket — Elite Freelance Marketplace for Software Engineers & Clients{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative bg-gradient-to-b from-brand-50/60 via-white to-slate-50 pt-16 pb-20 border-b border-slate-200/80 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto">
+            <!-- Pill Announcement -->
+            <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-brand-100/70 border border-brand-200/80 text-brand-800 text-xs font-semibold mb-6 shadow-sm">
+                <span class="w-2 h-2 rounded-full bg-brand-600 animate-pulse"></span>
+                <span>The Premier Platform for Software & Engineering Projects</span>
+            </div>
+
+            <!-- Headline -->
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                Hire world-class developers. <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-indigo-600">Build software faster.</span>
+            </h1>
+
+            <p class="mt-6 text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
+                Connect with vetted freelance engineers, AI builders, and DevOps specialists. Secure contracts with guaranteed mock escrow protection and transparent 10% platform fee.
+            </p>
+
+            <!-- Search Form -->
+            <div class="mt-8 max-w-2xl mx-auto">
+                <form action="{% url 'marketplace:project_list' %}" method="GET" class="relative flex items-center shadow-lg rounded-2xl bg-white border border-slate-200 p-2">
+                    <i data-lucide="search" class="w-5 h-5 text-slate-400 ml-3"></i>
+                    <input type="text" name="q" placeholder="Search projects by skill or title (e.g. Next.js, Django, Kubernetes)..."
+                           class="w-full px-4 py-2.5 text-sm bg-transparent border-0 focus:outline-none focus:ring-0 text-slate-800 placeholder-slate-400">
+                    <button type="submit" class="px-5 py-2.5 rounded-xl font-semibold text-sm text-white bg-brand-600 hover:bg-brand-700 transition-colors shadow-sm">
+                        Find Work
+                    </button>
+                </form>
+
+                <!-- Quick Tags -->
+                <div class="mt-3 flex flex-wrap items-center justify-center gap-1.5 text-xs text-slate-500">
+                    <span class="font-medium text-slate-400">Popular:</span>
+                    <a href="{% url 'marketplace:project_list' %}?skill=Python" class="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-brand-50 hover:text-brand-600 transition-colors">Python</a>
+                    <a href="{% url 'marketplace:project_list' %}?skill=React" class="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-brand-50 hover:text-brand-600 transition-colors">React</a>
+                    <a href="{% url 'marketplace:project_list' %}?skill=Django" class="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-brand-50 hover:text-brand-600 transition-colors">Django</a>
+                    <a href="{% url 'marketplace:project_list' %}?skill=Next.js" class="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-brand-50 hover:text-brand-600 transition-colors">Next.js</a>
+                    <a href="{% url 'marketplace:project_list' %}?skill=Kubernetes" class="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-brand-50 hover:text-brand-600 transition-colors">Kubernetes</a>
+                </div>
+            </div>
+
+            <!-- Call to Actions -->
+            <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="{% url 'marketplace:project_list' %}" class="w-full sm:w-auto px-6 py-3 rounded-xl font-semibold text-sm text-white bg-slate-900 hover:bg-slate-800 shadow-sm transition-all duration-150 flex items-center justify-center space-x-2">
+                    <i data-lucide="compass" class="w-4 h-4"></i>
+                    <span>Browse Open Projects</span>
+                </a>
+                <a href="{% url 'marketplace:project_create' %}" class="w-full sm:w-auto px-6 py-3 rounded-xl font-semibold text-sm text-brand-700 bg-brand-50 border border-brand-200 hover:bg-brand-100 transition-all duration-150 flex items-center justify-center space-x-2">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>Post a Project (For Clients)</span>
+                </a>
+            </div>
+
+            <!-- Live Metrics Strip -->
+            <div class="mt-14 pt-8 border-t border-slate-200/60 grid grid-cols-3 gap-4 max-w-xl mx-auto">
+                <div>
+                    <p class="text-2xl font-bold text-slate-900">{{ stats.projects_count|default:"3" }}</p>
+                    <p class="text-xs text-slate-500 font-medium mt-0.5">Active Projects</p>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-slate-900">{{ stats.freelancers_count|default:"2" }}</p>
+                    <p class="text-xs text-slate-500 font-medium mt-0.5">Vetted Developers</p>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-emerald-600">100%</p>
+                    <p class="text-xs text-slate-500 font-medium mt-0.5">Escrow Protection</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-16 bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-end mb-8">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Browse by Category</h2>
+                <p class="text-sm text-slate-500 mt-1">Specialized engineering disciplines tailored for modern software stacks</p>
+            </div>
+            <a href="{% url 'marketplace:project_list' %}" class="hidden sm:flex items-center space-x-1 text-sm font-semibold text-brand-600 hover:text-brand-700">
+                <span>View all projects</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {% for cat in categories %}
+                <a href="{% url 'marketplace:project_list' %}?category={{ cat.slug }}" class="group p-5 rounded-xl border border-slate-200 hover:border-brand-500 hover:shadow-md transition-all duration-200 bg-white">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center flex-shrink-0 group-hover:bg-brand-600 group-hover:text-white transition-colors duration-200">
+                            {% if cat.icon == 'code' %}<i data-lucide="code" class="w-6 h-6"></i>
+                            {% elif cat.icon == 'cpu' %}<i data-lucide="cpu" class="w-6 h-6"></i>
+                            {% elif cat.icon == 'cloud' %}<i data-lucide="cloud" class="w-6 h-6"></i>
+                            {% elif cat.icon == 'smartphone' %}<i data-lucide="smartphone" class="w-6 h-6"></i>
+                            {% elif cat.icon == 'palette' %}<i data-lucide="palette" class="w-6 h-6"></i>
+                            {% else %}<i data-lucide="shield" class="w-6 h-6"></i>{% endif %}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-base font-bold text-slate-900 group-hover:text-brand-600 transition-colors">{{ cat.name }}</h3>
+                            <p class="text-xs text-slate-500 mt-1 line-clamp-2">{{ cat.description }}</p>
+                        </div>
+                    </div>
+                </a>
+            {% empty %}
+                <p class="text-sm text-slate-500">No categories found.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Featured Projects Section -->
+<section class="py-16 bg-slate-50 border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-end mb-8">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Featured Open Projects</h2>
+                <p class="text-sm text-slate-500 mt-1">Real software opportunities waiting for qualified proposals</p>
+            </div>
+            <a href="{% url 'marketplace:project_list' %}" class="flex items-center space-x-1 text-sm font-semibold text-brand-600 hover:text-brand-700">
+                <span>Explore all {{ stats.projects_count }} projects</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for project in featured_projects %}
+                <div class="flex flex-col justify-between p-6 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                    <div>
+                        <!-- Header with Category and Budget -->
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-50 text-brand-700">
+                                {{ project.category.name|default:"Software" }}
+                            </span>
+                            <span class="text-lg font-bold text-slate-900">${{ project.budget }}</span>
+                        </div>
+
+                        <!-- Title -->
+                        <h3 class="text-base font-bold text-slate-900 leading-snug line-clamp-2 hover:text-brand-600 transition-colors">
+                            <a href="{% url 'marketplace:project_detail' project_id=project.id %}">
+                                {{ project.title }}
+                            </a>
+                        </h3>
+
+                        <!-- Description snippet -->
+                        <p class="mt-2 text-xs text-slate-600 line-clamp-3 leading-relaxed">
+                            {{ project.description }}
+                        </p>
+
+                        <!-- Required Skills Pills -->
+                        <div class="mt-4 flex flex-wrap gap-1.5">
+                            {% for skill in project.get_skills_list|slice:":4" %}
+                                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px] font-medium">
+                                    {{ skill }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Card Footer -->
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                        <div class="flex items-center space-x-3">
+                            <span class="flex items-center space-x-1">
+                                <i data-lucide="file-text" class="w-3.5 h-3.5 text-slate-400"></i>
+                                <span>{{ project.proposals_count }} proposals</span>
+                            </span>
+                            {% if project.deadline %}
+                                <span class="flex items-center space-x-1">
+                                    <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>
+                                    <span>Due {{ project.deadline|date:"M d" }}</span>
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <a href="{% url 'marketplace:project_detail' project_id=project.id %}" class="font-semibold text-brand-600 hover:text-brand-700 inline-flex items-center space-x-1">
+                            <span>Details</span>
+                            <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-span-3 text-center py-12 bg-white rounded-2xl border border-dashed border-slate-300">
+                    <p class="text-sm font-medium text-slate-600">No open projects right now.</p>
+                    <a href="{% url 'marketplace:project_create' %}" class="mt-3 inline-block btn-primary">Post the First Project</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Top Developers Showcase -->
+<section class="py-16 bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-end mb-8">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Top-Rated Developers</h2>
+                <p class="text-sm text-slate-500 mt-1">Verified talent with proven delivery records and stellar feedback</p>
+            </div>
+            <a href="{% url 'accounts:freelancer_list' %}" class="flex items-center space-x-1 text-sm font-semibold text-brand-600 hover:text-brand-700">
+                <span>View all developers</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for dev in top_freelancers %}
+                <div class="p-5 bg-white rounded-2xl border border-slate-200 hover:border-slate-300 shadow-sm transition-all duration-200 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center space-x-3.5">
+                            <div class="w-12 h-12 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-sm ring-2 ring-brand-500/20">
+                                {% if dev.avatar %}
+                                    <img src="{{ dev.avatar.url }}" alt="{{ dev.username }}" class="w-full h-full rounded-full object-cover">
+                                {% else %}
+                                    {{ dev.username|slice:":2"|upper }}
+                                {% endif %}
+                            </div>
+                            <div class="min-w-0">
+                                <h3 class="text-sm font-bold text-slate-900 truncate">{{ dev.get_display_name }}</h3>
+                                <p class="text-xs text-slate-500">@{{ dev.username }}</p>
+                            </div>
+                        </div>
+
+                        <p class="mt-3 text-xs font-semibold text-brand-700 line-clamp-1">
+                            {{ dev.profile.headline|default:"Software Engineer" }}
+                        </p>
+
+                        <p class="mt-1.5 text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                            {{ dev.profile.bio|default:"Experienced engineer dedicated to clean architecture and reliable delivery." }}
+                        </p>
+
+                        <!-- Rating & Rate -->
+                        <div class="mt-4 flex items-center justify-between text-xs font-semibold">
+                            <div class="flex items-center space-x-1 text-amber-500">
+                                <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+                                <span class="text-slate-800">{{ dev.profile.rating|default:"5.0" }}</span>
+                                <span class="text-slate-400 font-normal">({{ dev.profile.reviews_count }})</span>
+                            </div>
+                            <span class="text-slate-900 font-bold">${{ dev.profile.hourly_rate }}/hr</span>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'accounts:freelancer_profile' username=dev.username %}" class="mt-5 w-full py-2 px-3 text-center text-xs font-semibold text-brand-600 bg-brand-50 hover:bg-brand-100 rounded-lg transition-colors">
+                        View Profile & Reviews
+                    </a>
+                </div>
+            {% empty %}
+                <p class="text-sm text-slate-500">No freelancers registered yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- How DevMarket Works -->
+<section class="py-16 bg-slate-900 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-2xl mx-auto mb-12">
+            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">How DevMarket Works</h2>
+            <p class="mt-2 text-sm text-slate-400">A structured, secure lifecycle from proposal to release of escrow payment</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="relative p-6 bg-slate-800/80 rounded-2xl border border-slate-700/80">
+                <span class="text-3xl font-extrabold text-brand-500">01</span>
+                <h3 class="text-base font-bold text-white mt-3">Post or Browse</h3>
+                <p class="mt-2 text-xs text-slate-400 leading-relaxed">
+                    Clients publish detailed requirements and budgets. Developers browse filtered listings matching their tech stack.
+                </p>
+            </div>
+
+            <div class="relative p-6 bg-slate-800/80 rounded-2xl border border-slate-700/80">
+                <span class="text-3xl font-extrabold text-brand-500">02</span>
+                <h3 class="text-base font-bold text-white mt-3">Tailored Proposals</h3>
+                <p class="mt-2 text-xs text-slate-400 leading-relaxed">
+                    Freelancers submit cover letters, bids, and timeline estimates. Clients compare applicants and direct message talent.
+                </p>
+            </div>
+
+            <div class="relative p-6 bg-slate-800/80 rounded-2xl border border-slate-700/80">
+                <span class="text-3xl font-extrabold text-brand-500">03</span>
+                <h3 class="text-base font-bold text-white mt-3">Safe Escrow Lock</h3>
+                <p class="mt-2 text-xs text-slate-400 leading-relaxed">
+                    When an offer is accepted, funds are secured in safe escrow with a transparent 10% platform fee.
+                </p>
+            </div>
+
+            <div class="relative p-6 bg-slate-800/80 rounded-2xl border border-slate-700/80">
+                <span class="text-3xl font-extrabold text-brand-500">04</span>
+                <h3 class="text-base font-bold text-white mt-3">Delivery & Review</h3>
+                <p class="mt-2 text-xs text-slate-400 leading-relaxed">
+                    Work is delivered for review. Upon client satisfaction, funds are disbursed and verified reviews are recorded.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

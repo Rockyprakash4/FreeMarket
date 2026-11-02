@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Find Developers & Freelance Software Engineers — DevMarket{% endblock %}
+
+{% block content %}
+<div class="bg-slate-50 border-b border-slate-200 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Discover Top Software Engineers</h1>
+        <p class="text-sm text-slate-500 mt-1">Hire vetted full-stack engineers, AI developers, and cloud architects on demand.</p>
+
+        <!-- Search Bar -->
+        <form method="GET" class="mt-6 flex flex-col sm:flex-row gap-3">
+            <div class="relative flex-1">
+                <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3"></i>
+                <input type="text" name="q" value="{{ query }}" placeholder="Search by name, headline, bio, or skill (e.g. React, Python)..."
+                       class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm bg-white shadow-sm">
+            </div>
+            <div class="flex items-center gap-2">
+                <input type="text" name="skill" value="{{ skill_filter }}" placeholder="Filter by skill..."
+                       class="w-40 px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm bg-white shadow-sm">
+                <button type="submit" class="px-5 py-2.5 rounded-xl font-semibold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-colors">
+                    Search
+                </button>
+                {% if query or skill_filter or exp_filter or avail_filter %}
+                    <a href="{% url 'accounts:freelancer_list' %}" class="px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors">
+                        Reset
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="flex justify-between items-center mb-6">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            Showing <span class="text-slate-900 font-bold">{{ total_count }}</span> Verified Developers
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for dev in page_obj %}
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col justify-between">
+                <div>
+                    <!-- Header -->
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-sm ring-2 ring-brand-500/20 flex-shrink-0">
+                                {% if dev.avatar %}
+                                    <img src="{{ dev.avatar.url }}" alt="{{ dev.username }}" class="w-full h-full rounded-full object-cover">
+                                {% else %}
+                                    {{ dev.username|slice:":2"|upper }}
+                                {% endif %}
+                            </div>
+                            <div class="min-w-0">
+                                <h2 class="text-base font-bold text-slate-900 truncate">
+                                    <a href="{% url 'accounts:freelancer_profile' username=dev.username %}" class="hover:text-brand-600">
+                                        {{ dev.get_display_name }}
+                                    </a>
+                                </h2>
+                                <p class="text-xs text-slate-500">@{{ dev.username }}</p>
+                            </div>
+                        </div>
+
+                        <span class="text-base font-extrabold text-slate-900 flex-shrink-0">
+                            ${{ dev.profile.hourly_rate }}<span class="text-xs font-normal text-slate-500">/hr</span>
+                        </span>
+                    </div>
+
+                    <!-- Headline -->
+                    <p class="mt-3 text-xs font-bold text-brand-700 line-clamp-1">
+                        {{ dev.profile.headline|default:"Software Engineer" }}
+                    </p>
+
+                    <!-- Bio -->
+                    <p class="mt-2 text-xs text-slate-600 line-clamp-3 leading-relaxed">
+                        {{ dev.profile.bio|default:"Full-stack developer ready for freelance projects." }}
+                    </p>
+
+                    <!-- Skills -->
+                    <div class="mt-4 flex flex-wrap gap-1.5">
+                        {% for skill in dev.profile.get_skills_list|slice:":5" %}
+                            <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px] font-medium">
+                                {{ skill }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <div class="flex items-center space-x-1 text-xs font-semibold text-amber-500">
+                        <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+                        <span class="text-slate-800">{{ dev.profile.rating|default:"5.0" }}</span>
+                        <span class="text-slate-400 font-normal">({{ dev.profile.reviews_count }})</span>
+                    </div>
+
+                    <a href="{% url 'accounts:freelancer_profile' username=dev.username %}" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-brand-600 bg-brand-50 hover:bg-brand-100 transition-colors">
+                        View Profile
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-span-3 text-center py-16 bg-white rounded-2xl border border-dashed border-slate-300">
+                <i data-lucide="users" class="w-10 h-10 text-slate-300 mx-auto mb-3"></i>
+                <h3 class="text-sm font-bold text-slate-800">No developers match your criteria</h3>
+                <p class="text-xs text-slate-500 mt-1">Try adjusting your search keywords or resetting filters.</p>
+                <a href="{% url 'accounts:freelancer_list' %}" class="mt-4 inline-block btn-secondary text-xs">Clear Filters</a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+        <div class="mt-10 flex justify-center space-x-2">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if skill_filter %}&skill={{ skill_filter }}{% endif %}"
+                   class="px-3.5 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50">
+                    &larr; Previous
+                </a>
+            {% endif %}
+            <span class="px-4 py-2 text-xs font-medium text-slate-500">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if skill_filter %}&skill={{ skill_filter }}{% endif %}"
+                   class="px-3.5 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50">
+                    Next &rarr;
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+

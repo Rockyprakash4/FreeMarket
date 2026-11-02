@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Messages — DevMarket{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="mb-8 pb-5 border-b border-slate-200">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Direct Messages</h1>
+        <p class="text-sm text-slate-500 mt-1">Communicate directly with clients and developers about requirements and projects.</p>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm divide-y divide-slate-100">
+        {% for conv in conversations %}
+            {% with other=conv.get_other_participant user=user %}
+                <a href="{% url 'messaging:conversation_detail' conversation_id=conv.id %}" class="flex items-center justify-between p-5 hover:bg-slate-50/80 transition-colors">
+                    <div class="flex items-center space-x-4 min-w-0">
+                        <div class="w-12 h-12 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-sm ring-2 ring-brand-500/20 flex-shrink-0">
+                            {{ other.username|slice:":2"|upper|default:"DM" }}
+                        </div>
+
+                        <div class="min-w-0">
+                            <div class="flex items-center space-x-2">
+                                <h3 class="text-sm font-bold text-slate-900 truncate">{{ other.get_display_name|default:"Chat Participant" }}</h3>
+                                {% if conv.project %}
+                                    <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-semibold truncate max-w-[200px]">
+                                        {{ conv.project.title }}
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <p class="text-xs text-slate-500 truncate mt-0.5">
+                                {% with last_msg=conv.messages.last %}
+                                    {% if last_msg %}
+                                        <span class="font-medium text-slate-700">{% if last_msg.sender == user %}You: {% endif %}</span>{{ last_msg.content }}
+                                    {% else %}
+                                        Conversation started
+                                    {% endif %}
+                                {% endwith %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="text-right flex-shrink-0 ml-4">
+                        <span class="text-[11px] text-slate-400 block">{{ conv.updated_at|timesince }} ago</span>
+                        {% with unread=conv.messages.filter.count %}
+                            <!-- unread dot if relevant -->
+                        {% endwith %}
+                    </div>
+                </a>
+            {% endwith %}
+        {% empty %}
+            <div class="text-center py-16">
+                <i data-lucide="message-square" class="w-10 h-10 text-slate-300 mx-auto mb-3"></i>
+                <h3 class="text-sm font-bold text-slate-800">No messages yet</h3>
+                <p class="text-xs text-slate-500 mt-1">Direct conversations with clients or developers will appear here.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+

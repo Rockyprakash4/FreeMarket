@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}About DevMarket — The Modern Freelance Platform for Software{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center max-w-2xl mx-auto mb-12">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">About DevMarket</h1>
+        <p class="text-base text-slate-600 mt-3 leading-relaxed">
+            Bridging the gap between ambitious companies and world-class software engineers through transparency, verified skills, and automated escrow.
+        </p>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 shadow-sm space-y-8 text-sm text-slate-700 leading-relaxed">
+        <div>
+            <h2 class="text-xl font-bold text-slate-900 mb-3">Our Mission</h2>
+            <p>
+                Hiring technical talent should not feel like gambling. DevMarket was designed from the ground up for software developers and tech-driven project owners. We remove friction, eliminate speculative proposals, and ensure every contract is backed by verified code deliverables and milestone-secured escrow.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-slate-100">
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100">
+                <div class="w-9 h-9 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center font-bold mb-3">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                </div>
+                <h3 class="text-sm font-bold text-slate-900 mb-1">Protected Escrow</h3>
+                <p class="text-xs text-slate-500">Client payments are held securely until project deliverables are approved.</p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100">
+                <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold mb-3">
+                    <i data-lucide="percent" class="w-5 h-5"></i>
+                </div>
+                <h3 class="text-sm font-bold text-slate-900 mb-1">Transparent 10% Fee</h3>
+                <p class="text-xs text-slate-500">No hidden surprises or arbitrary tiers. A flat 10% platform commission on completed projects.</p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100">
+                <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold mb-3">
+                    <i data-lucide="code" class="w-5 h-5"></i>
+                </div>
+                <h3 class="text-sm font-bold text-slate-900 mb-1">Developer-Centric</h3>
+                <p class="text-xs text-slate-500">Rich profiles showcasing GitHub links, verified skills, and client ratings.</p>
+            </div>
+        </div>
+
+        <div class="pt-6 border-t border-slate-100">
+            <h2 class="text-xl font-bold text-slate-900 mb-3">Technology Stack</h2>
+            <p>
+                DevMarket is built on an enterprise modern stack:
+            </p>
+            <ul class="list-disc list-inside mt-3 space-y-1.5 text-xs text-slate-600">
+                <li><strong>Django 6.1:</strong> Robust web framework with full CSRF protection and role-based permissions.</li>
+                <li><strong>MongoDB via django-mongodb-backend:</strong> High-performance document database with native ObjectId support.</li>
+                <li><strong>Tailwind CSS:</strong> Professional SaaS UI styled with consistent typography and responsive layouts.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} Project — DevMarket{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="mb-8 pb-5 border-b border-slate-200">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{{ action }} Software Project</h1>
+        <p class="text-sm text-slate-500 mt-1">Specify your project scope, budget, required technologies, and delivery expectations.</p>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm">
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Project Title</label>
+                {{ form.title }}
+                {% if form.title.errors %}<p class="mt-1 text-xs text-rose-600">{{ form.title.errors.0 }}</p>{% endif %}
+                <p class="text-[11px] text-slate-400 mt-1">Write a clear, concise headline describing the technical scope</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Category</label>
+                    {{ form.category }}
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Pricing Model</label>
+                    {{ form.project_type }}
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Required Technical Skills</label>
+                {{ form.required_skills }}
+                {% if form.required_skills.errors %}<p class="mt-1 text-xs text-rose-600">{{ form.required_skills.errors.0 }}</p>{% endif %}
+                <p class="text-[11px] text-slate-400 mt-1">Comma-separated list (e.g. Next.js, Django, TypeScript, MongoDB, Docker)</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Budget ($ USD)</label>
+                    {{ form.budget }}
+                    {% if form.budget.errors %}<p class="mt-1 text-xs text-rose-600">{{ form.budget.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Target Deadline</label>
+                    {{ form.deadline }}
+                    <p class="text-[11px] text-slate-400 mt-1">Optional expected completion date</p>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Project Scope & Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}<p class="mt-1 text-xs text-rose-600">{{ form.description.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
+                <a href="{% url 'marketplace:project_list' %}" class="px-5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2.5 rounded-xl font-semibold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-colors">
+                    {% if action == 'Create' %}Publish Project & Open Proposals{% else %}Save Changes{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

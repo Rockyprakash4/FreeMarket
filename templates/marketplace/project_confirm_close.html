@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Close Project — DevMarket{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-16">
+    <div class="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm text-center">
+        <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+        </div>
+        <h1 class="text-xl font-bold text-slate-900">Close this Project?</h1>
+        <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+            Are you sure you want to close <strong>"{{ project.title }}"</strong>? It will no longer appear in open searches or accept new freelancer proposals.
+        </p>
+
+        <form method="POST" class="mt-6 flex flex-col gap-2">
+            {% csrf_token %}
+            <button type="submit" class="w-full py-2.5 rounded-xl font-semibold text-sm text-white bg-rose-600 hover:bg-rose-700 transition-colors shadow-sm">
+                Yes, Close Project
+            </button>
+            <a href="{% url 'marketplace:project_detail' project_id=project.id %}" class="w-full py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+                Cancel
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

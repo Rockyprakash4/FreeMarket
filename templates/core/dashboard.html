@@ -1,0 +1,379 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard — DevMarket{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <!-- Dashboard Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-slate-200">
+        <div>
+            <div class="flex items-center space-x-3">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                    Welcome back, {{ user.get_display_name }}
+                </h1>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {% if is_client %}bg-indigo-100 text-indigo-800{% else %}bg-emerald-100 text-emerald-800{% endif %}">
+                    {{ user.get_role_display }}
+                </span>
+            </div>
+            <p class="text-sm text-slate-500 mt-1">Here is a summary of your active engagements, requests, and platform activity.</p>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            {% if is_client %}
+                <a href="{% url 'marketplace:project_create' %}" class="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl font-semibold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-colors">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>Post New Project</span>
+                </a>
+            {% else %}
+                <a href="{% url 'marketplace:project_list' %}" class="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl font-semibold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-colors">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                    <span>Browse Open Projects</span>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if is_client %}
+        <!-- CLIENT DASHBOARD -->
+
+        <!-- KPI Metrics Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-8">
+            <div class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Projects</span>
+                    <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                        <i data-lucide="folder-kanban" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <p class="text-3xl font-extrabold text-slate-900 mt-2">{{ total_projects }}</p>
+                <span class="text-xs text-slate-500 mt-1 inline-block">{{ active_projects }} currently active</span>
+            </div>
+
+            <div class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Orders</span>
+                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <i data-lucide="briefcase" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <p class="text-3xl font-extrabold text-slate-900 mt-2">{{ active_orders }}</p>
+                <span class="text-xs text-emerald-600 font-medium mt-1 inline-block">Secured in Escrow</span>
+            </div>
+
+            <div class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pending Proposals</span>
+                    <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <i data-lucide="inbox" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <p class="text-3xl font-extrabold text-slate-900 mt-2">{{ pending_proposals.count }}</p>
+                <span class="text-xs text-amber-600 font-medium mt-1 inline-block">Awaiting your review</span>
+            </div>
+
+            <div class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Invested</span>
+                    <div class="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
+                        <i data-lucide="credit-card" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <p class="text-3xl font-extrabold text-slate-900 mt-2">${{ total_spent }}</p>
+                <span class="text-xs text-slate-500 mt-1 inline-block">Completed engagements</span>
+            </div>
+        </div>
+
+        <!-- Pending Proposals Alert Section -->
+        {% if pending_proposals %}
+            <div class="mt-8 bg-amber-50/70 border border-amber-200 rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-2.5">
+                        <i data-lucide="bell" class="w-5 h-5 text-amber-600"></i>
+                        <h2 class="text-base font-bold text-amber-900">Incoming Proposals Requiring Your Decision</h2>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    {% for prop in pending_proposals %}
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-white rounded-xl border border-amber-200/80 gap-3">
+                            <div>
+                                <span class="text-xs font-semibold text-slate-400">Project:</span>
+                                <a href="{% url 'marketplace:project_detail' project_id=prop.project.id %}" class="text-sm font-bold text-slate-900 hover:text-brand-600 ml-1">
+                                    {{ prop.project.title }}
+                                </a>
+                                <div class="flex items-center space-x-3 text-xs text-slate-500 mt-1">
+                                    <span>Applicant: <strong class="text-slate-700">{{ prop.freelancer.get_display_name }}</strong></span>
+                                    <span>•</span>
+                                    <span>Bid: <strong class="text-slate-900 font-bold">${{ prop.proposed_price }}</strong></span>
+                                    <span>•</span>
+                                    <span>Delivery: {{ prop.estimated_delivery_days }} days</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2 flex-shrink-0">
+                                <a href="{% url 'proposals:project_proposals' project_id=prop.project.id %}" class="px-3.5 py-1.5 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition-colors">
+                                    Review & Accept
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- My Projects & Active Orders Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+            <!-- My Projects -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-5">
+                    <h2 class="text-base font-bold text-slate-900">My Posted Projects</h2>
+                    <a href="{% url 'marketplace:project_create' %}" class="text-xs font-semibold text-brand-600 hover:text-brand-700">+ New Project</a>
+                </div>
+
+                <div class="space-y-3">
+                    {% for proj in my_projects %}
+                        <div class="p-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-slate-50 transition-colors">
+                            <div class="flex items-start justify-between gap-2">
+                                <h3 class="text-sm font-bold text-slate-900 line-clamp-1">
+                                    <a href="{% url 'marketplace:project_detail' project_id=proj.id %}" class="hover:text-brand-600">
+                                        {{ proj.title }}
+                                    </a>
+                                </h3>
+                                <span class="px-2 py-0.5 rounded text-[11px] font-semibold flex-shrink-0
+                                    {% if proj.status == 'open' %}bg-emerald-100 text-emerald-800
+                                    {% elif proj.status == 'in_progress' %}bg-indigo-100 text-indigo-800
+                                    {% elif proj.status == 'completed' %}bg-slate-200 text-slate-700
+                                    {% else %}bg-rose-100 text-rose-800{% endif %}">
+                                    {{ proj.get_status_display }}
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs text-slate-500 mt-2">
+                                <span>Budget: <strong class="text-slate-800 font-semibold">${{ proj.budget }}</strong></span>
+                                <a href="{% url 'proposals:project_proposals' project_id=proj.id %}" class="font-semibold text-brand-600 hover:underline">
+                                    {{ proj.proposals_count }} proposals &rarr;
+                                </a>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-8">
+                            <i data-lucide="folder-open" class="w-8 h-8 text-slate-300 mx-auto mb-2"></i>
+                            <p class="text-xs text-slate-500">You haven't posted any projects yet.</p>
+                            <a href="{% url 'marketplace:project_create' %}" class="mt-3 inline-block btn-primary text-xs">Post a Project</a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Active Orders -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-5">
+                    <h2 class="text-base font-bold text-slate-900">Recent Orders</h2>
+                    <a href="{% url 'orders:order_list' %}" class="text-xs font-semibold text-brand-600 hover:text-brand-700">View All</a>
+                </div>
+
+                <div class="space-y-3">
+                    {% for ord in my_orders %}
+                        <div class="p-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-slate-50 transition-colors">
+                            <div class="flex items-start justify-between gap-2">
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-900 line-clamp-1">
+                                        <a href="{% url 'orders:order_detail' order_id=ord.id %}" class="hover:text-brand-600">
+                                            {{ ord.project.title }}
+                                        </a>
+                                    </h3>
+                                    <p class="text-xs text-slate-500 mt-0.5">Freelancer: {{ ord.freelancer.get_display_name }}</p>
+                                </div>
+                                <span class="px-2 py-0.5 rounded text-[11px] font-semibold flex-shrink-0
+                                    {% if ord.status == 'delivered' %}bg-amber-100 text-amber-800 animate-pulse
+                                    {% elif ord.status == 'active' %}bg-indigo-100 text-indigo-800
+                                    {% elif ord.status == 'completed' %}bg-emerald-100 text-emerald-800
+                                    {% else %}bg-slate-200 text-slate-700{% endif %}">
+                                    {{ ord.get_status_display }}
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs text-slate-500 mt-3 pt-2 border-t border-slate-200/60">
+                                <span>Total Amount: <strong class="text-slate-900 font-semibold">${{ ord.total_amount }}</strong></span>
+                                <a href="{% url 'orders:order_detail' order_id=ord.id %}" class="font-semibold text-brand-600 hover:underline">
+                                    View Order &rarr;
+                                </a>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-8">
+                            <i data-lucide="package" class="w-8 h-8 text-slate-300 mx-auto mb-2"></i>
+                            <p class="text-xs text-slate-500">No active orders yet.</p>
+                            <p class="text-[11px] text-slate-400 mt-1">Accept a proposal on your project to kick off an order.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <!-- FREELANCER DASHBOARD -->
+
+        <!-- KPI Metrics Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-8">
+            <div class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Proposals</span>
+                    <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <p class="text-3xl font-extrabold text-slate-900 mt-2">{{ total_proposals }}</p>
+                <span class="text-xs text-slate-500 mt-1 inline-block">{{ pending_proposals_count }} under client review</span>
+            </div>
+
+            <div class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Contracts</span>
+                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <i data-lucide="briefcase" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <p class="text-3xl font-extrabold text-slate-900 mt-2">{{ active_orders_count }}</p>
+                <span class="text-xs text-emerald-600 font-medium mt-1 inline-block">In progress</span>
+            </div>
+
+            <div class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Client Rating</span>
+                    <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <i data-lucide="star" class="w-4 h-4 fill-amber-500"></i>
+                    </div>
+                </div>
+                <p class="text-3xl font-extrabold text-slate-900 mt-2">{{ user.profile.rating|default:"5.0" }}</p>
+                <span class="text-xs text-slate-500 mt-1 inline-block">Based on {{ user.profile.reviews_count }} verified reviews</span>
+            </div>
+
+            <div class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Earned</span>
+                    <div class="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
+                        <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <p class="text-3xl font-extrabold text-slate-900 mt-2">${{ total_earned }}</p>
+                <span class="text-xs text-slate-500 mt-1 inline-block">Net disbursed payout</span>
+            </div>
+        </div>
+
+        <!-- Active Contracts Deliveries Section -->
+        {% if active_orders %}
+            <div class="mt-8 bg-indigo-50/70 border border-indigo-200 rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-2.5">
+                        <i data-lucide="zap" class="w-5 h-5 text-indigo-600"></i>
+                        <h2 class="text-base font-bold text-indigo-900">Active Work in Progress</h2>
+                    </div>
+                    <a href="{% url 'orders:order_list' %}" class="text-xs font-semibold text-indigo-700 hover:underline">View All Orders</a>
+                </div>
+                <div class="space-y-3">
+                    {% for order in active_orders %}
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-white rounded-xl border border-indigo-100 gap-3">
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900">
+                                    <a href="{% url 'orders:order_detail' order_id=order.id %}" class="hover:text-brand-600">
+                                        {{ order.project.title }}
+                                    </a>
+                                </h3>
+                                <div class="flex items-center space-x-3 text-xs text-slate-500 mt-1">
+                                    <span>Client: <strong>{{ order.client.get_display_name }}</strong></span>
+                                    <span>•</span>
+                                    <span>Your Net Payout: <strong class="text-emerald-700 font-bold">${{ order.freelancer_payout }}</strong></span>
+                                    <span>•</span>
+                                    <span>Status: <strong class="text-slate-800">{{ order.get_status_display }}</strong></span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <a href="{% url 'orders:order_detail' order_id=order.id %}" class="px-3.5 py-1.5 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition-colors">
+                                    Submit Deliverables
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Submitted Proposals & Recommended Projects Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+            <!-- My Proposals -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-5">
+                    <h2 class="text-base font-bold text-slate-900">My Recent Proposals</h2>
+                    <a href="{% url 'marketplace:project_list' %}" class="text-xs font-semibold text-brand-600 hover:text-brand-700">+ Apply for More</a>
+                </div>
+
+                <div class="space-y-3">
+                    {% for prop in my_proposals %}
+                        <div class="p-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-slate-50 transition-colors">
+                            <div class="flex items-start justify-between gap-2">
+                                <h3 class="text-sm font-bold text-slate-900 line-clamp-1">
+                                    <a href="{% url 'marketplace:project_detail' project_id=prop.project.id %}" class="hover:text-brand-600">
+                                        {{ prop.project.title }}
+                                    </a>
+                                </h3>
+                                <span class="px-2 py-0.5 rounded text-[11px] font-semibold flex-shrink-0
+                                    {% if prop.status == 'pending' %}bg-amber-100 text-amber-800
+                                    {% elif prop.status == 'accepted' %}bg-emerald-100 text-emerald-800
+                                    {% elif prop.status == 'rejected' %}bg-rose-100 text-rose-800
+                                    {% else %}bg-slate-200 text-slate-700{% endif %}">
+                                    {{ prop.get_status_display }}
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs text-slate-500 mt-2">
+                                <span>Your Bid: <strong class="text-slate-900 font-semibold">${{ prop.proposed_price }}</strong> ({{ prop.estimated_delivery_days }} days)</span>
+                                <span class="text-[11px] text-slate-400">{{ prop.created_at|timesince }} ago</span>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-8">
+                            <i data-lucide="file-text" class="w-8 h-8 text-slate-300 mx-auto mb-2"></i>
+                            <p class="text-xs text-slate-500">You haven't submitted any proposals yet.</p>
+                            <a href="{% url 'marketplace:project_list' %}" class="mt-3 inline-block btn-primary text-xs">Explore Projects</a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Recommended Projects -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-5">
+                    <h2 class="text-base font-bold text-slate-900">Recommended for You</h2>
+                    <a href="{% url 'marketplace:project_list' %}" class="text-xs font-semibold text-brand-600 hover:text-brand-700">Explore All</a>
+                </div>
+
+                <div class="space-y-3">
+                    {% for p in recommended_projects %}
+                        <div class="p-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-slate-50 transition-colors">
+                            <div class="flex items-start justify-between gap-2">
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-900 line-clamp-1">
+                                        <a href="{% url 'marketplace:project_detail' project_id=p.id %}" class="hover:text-brand-600">
+                                            {{ p.title }}
+                                        </a>
+                                    </h3>
+                                    <p class="text-xs text-slate-500 mt-1 line-clamp-1">{{ p.required_skills }}</p>
+                                </div>
+                                <span class="text-sm font-bold text-slate-900">${{ p.budget }}</span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs text-slate-500 mt-3 pt-2 border-t border-slate-200/60">
+                                <span>Category: {{ p.category.name|default:"General" }}</span>
+                                <a href="{% url 'marketplace:project_detail' project_id=p.id %}" class="font-semibold text-brand-600 hover:underline">
+                                    Apply Now &rarr;
+                                </a>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-xs text-slate-500 text-center py-6">No recommended projects right now.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+
+</div>
+{% endblock %}
+

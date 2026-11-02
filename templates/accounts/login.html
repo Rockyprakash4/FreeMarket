@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In — DevMarket{% endblock %}
+
+{% block content %}
+<div class="min-h-[75vh] flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-50">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="text-center">
+            <div class="inline-flex w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-700 to-indigo-500 items-center justify-center text-white shadow-md shadow-brand-500/20 mb-3">
+                <i data-lucide="layers" class="w-6 h-6"></i>
+            </div>
+            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Sign in to DevMarket</h2>
+            <p class="mt-2 text-sm text-slate-600">
+                Don't have an account yet?
+                <a href="{% url 'accounts:register' %}" class="font-semibold text-brand-600 hover:text-brand-500">Join now</a>
+            </p>
+        </div>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white py-8 px-6 shadow-sm border border-slate-200 sm:rounded-2xl sm:px-10">
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Username</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <p class="mt-1 text-xs text-rose-600">{{ form.username.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-medium text-slate-700">Password</label>
+                    </div>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        <p class="mt-1 text-xs text-rose-600">{{ form.password.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors">
+                        Sign In
+                    </button>
+                </div>
+
+                <!-- Demo quick fill logins -->
+                <div class="mt-6 pt-5 border-t border-slate-100">
+                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 text-center">Demo Fast-Logins</p>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <button type="button" onclick="document.getElementById('id_username').value='alex_client';document.getElementById('id_password').value='DevMarket2026!';" class="p-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium text-center">
+                            Client (alex_client)
+                        </button>
+                        <button type="button" onclick="document.getElementById('id_username').value='sarah_dev';document.getElementById('id_password').value='DevMarket2026!';" class="p-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium text-center">
+                            Freelancer (sarah_dev)
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+
+{% block title %}Order #{{ order.id }} — {{ order.project.title }} — DevMarket{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <!-- Breadcrumb -->
+    <div class="flex items-center space-x-2 text-xs text-slate-500 mb-6">
+        <a href="{% url 'orders:order_list' %}" class="hover:text-slate-800">Orders</a>
+        <span>/</span>
+        <span class="text-slate-700 font-medium truncate max-w-md">Order #{{ order.id }}</span>
+    </div>
+
+    <!-- Milestone Progress Bar -->
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-100 gap-2">
+            <div>
+                <span class="text-xs font-bold text-slate-400">Order #{{ order.id }}</span>
+                <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">{{ order.project.title }}</h1>
+            </div>
+            <span class="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider self-start sm:self-auto
+                {% if order.status == 'delivered' %}bg-amber-100 text-amber-800 animate-pulse
+                {% elif order.status == 'active' %}bg-indigo-100 text-indigo-800
+                {% elif order.status == 'completed' %}bg-emerald-100 text-emerald-800
+                {% else %}bg-slate-200 text-slate-700{% endif %}">
+                {{ order.get_status_display }}
+            </span>
+        </div>
+
+        <!-- 3-Step Milestone Tracker -->
+        <div class="mt-8 grid grid-cols-3 gap-2 sm:gap-4 text-center">
+            <!-- Step 1 -->
+            <div class="p-3 sm:p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
+                <div class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold mx-auto mb-2">
+                    ✓
+                </div>
+                <p class="text-xs font-bold text-emerald-950">1. Escrow Funded</p>
+                <p class="text-[10px] text-emerald-700 mt-0.5">Agreement Started</p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="p-3 sm:p-4 rounded-2xl {% if order.status == 'delivered' or order.status == 'completed' %}bg-emerald-50 border border-emerald-200{% else %}bg-indigo-50 border border-indigo-200{% endif %}">
+                <div class="w-7 h-7 rounded-full {% if order.status == 'delivered' or order.status == 'completed' %}bg-emerald-600 text-white{% else %}bg-indigo-600 text-white animate-pulse{% endif %} flex items-center justify-center text-xs font-bold mx-auto mb-2">
+                    {% if order.status == 'delivered' or order.status == 'completed' %}✓{% else %}2{% endif %}
+                </div>
+                <p class="text-xs font-bold {% if order.status == 'delivered' or order.status == 'completed' %}text-emerald-950{% else %}text-indigo-950{% endif %}">2. Work Delivered</p>
+                <p class="text-[10px] text-slate-500 mt-0.5">{% if order.delivered_at %}{{ order.delivered_at|date:"M d, H:i" }}{% else %}Awaiting Submission{% endif %}</p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="p-3 sm:p-4 rounded-2xl {% if order.status == 'completed' %}bg-emerald-50 border border-emerald-200{% else %}bg-slate-50 border border-slate-200{% endif %}">
+                <div class="w-7 h-7 rounded-full {% if order.status == 'completed' %}bg-emerald-600 text-white{% else %}bg-slate-300 text-slate-700{% endif %} flex items-center justify-center text-xs font-bold mx-auto mb-2">
+                    {% if order.status == 'completed' %}✓{% else %}3{% endif %}
+                </div>
+                <p class="text-xs font-bold {% if order.status == 'completed' %}text-emerald-950{% else %}text-slate-600{% endif %}">3. Approved & Paid</p>
+                <p class="text-[10px] text-slate-500 mt-0.5">{% if order.completed_at %}{{ order.completed_at|date:"M d, H:i" }}{% else %}Escrow Release{% endif %}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Left 2 Cols: Deliverables & Client/Freelancer Actions -->
+        <div class="lg:col-span-2 space-y-8">
+
+            <!-- Deliverables Section -->
+            <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+                <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center space-x-2">
+                    <i data-lucide="folder-git-2" class="w-5 h-5 text-brand-600"></i>
+                    <span>Project Deliverables & Submission</span>
+                </h2>
+
+                {% if order.status == 'delivered' or order.status == 'completed' %}
+                    <div class="space-y-4">
+                        {% if order.delivery_url %}
+                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                                <span class="text-xs font-semibold text-slate-500 block mb-1">Deliverables Link / Repository / Live Demo:</span>
+                                <a href="{{ order.delivery_url }}" target="_blank" rel="noopener noreferrer" class="text-sm font-bold text-brand-600 hover:underline flex items-center space-x-1.5 break-all">
+                                    <span>{{ order.delivery_url }}</span>
+                                    <i data-lucide="external-link" class="w-4 h-4 flex-shrink-0"></i>
+                                </a>
+                            </div>
+                        {% endif %}
+
+                        {% if order.delivery_notes %}
+                            <div>
+                                <span class="text-xs font-semibold text-slate-500 block mb-1">Developer Delivery Notes:</span>
+                                <p class="text-xs text-slate-700 whitespace-pre-line leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                    {{ order.delivery_notes }}
+                                </p>
+                            </div>
+                        {% endif %}
+
+                        {% if order.delivery_file %}
+                            <div class="flex items-center space-x-2 text-xs">
+                                <span class="text-slate-500">Deliverable Attachment:</span>
+                                <a href="{{ order.delivery_file.url }}" download class="font-bold text-brand-600 hover:underline inline-flex items-center space-x-1">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                                    <span>Download File</span>
+                                </a>
+                            </div>
+                        {% endif %}
+
+                        <!-- Client Approval CTA -->
+                        {% if is_client and order.status == 'delivered' %}
+                            <div class="mt-6 pt-5 border-t border-slate-100 bg-emerald-50/70 p-5 rounded-2xl border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                <div>
+                                    <h3 class="text-sm font-bold text-emerald-950">Satisfied with the deliverables?</h3>
+                                    <p class="text-xs text-emerald-800 mt-0.5">Approving will release the escrow payout of ${{ order.freelancer_payout }} to {{ order.freelancer.get_display_name }}.</p>
+                                </div>
+                                <a href="{% url 'orders:order_approve' order_id=order.id %}" class="px-5 py-2.5 rounded-xl font-semibold text-xs text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-colors flex-shrink-0">
+                                    Approve & Release Payment
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                {% else %}
+                    <!-- Awaiting Delivery State -->
+                    <div class="text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                        <i data-lucide="clock" class="w-8 h-8 text-slate-300 mx-auto mb-2"></i>
+                        <p class="text-xs font-semibold text-slate-700">Deliverables have not been submitted yet.</p>
+                        <p class="text-[11px] text-slate-500 mt-1">The freelancer is currently working on the requirements.</p>
+                    </div>
+                {% endif %}
+
+                <!-- Freelancer Delivery Form (When Active or Delivered) -->
+                {% if is_freelancer and order.status in 'active,delivered' %}
+                    <div class="mt-8 pt-6 border-t border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-900 mb-2 flex items-center space-x-2">
+                            <i data-lucide="upload-cloud" class="w-4 h-4 text-brand-600"></i>
+                            <span>{% if order.status == 'delivered' %}Update Submission{% else %}Submit Work for Review{% endif %}</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mb-4">Provide the link to the completed code, staging site, or notes for the client.</p>
+
+                        <form action="{% url 'orders:order_deliver' order_id=order.id %}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            {% csrf_token %}
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Deliverables Link (GitHub PR, Live Demo, Drive)</label>
+                                {{ delivery_form.delivery_url }}
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Delivery Notes & Overview</label>
+                                {{ delivery_form.delivery_notes }}
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Optional Deliverable Archive / File</label>
+                                {{ delivery_form.delivery_file }}
+                            </div>
+
+                            <div class="flex justify-end pt-2">
+                                <button type="submit" class="px-5 py-2.5 rounded-xl font-semibold text-xs text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-colors">
+                                    {% if order.status == 'delivered' %}Update Deliverables{% else %}Submit Deliverables to Client{% endif %}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Reviews Section if Completed -->
+            {% if order.status == 'completed' %}
+                <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+                    <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center space-x-2">
+                        <i data-lucide="star" class="w-5 h-5 text-amber-500"></i>
+                        <span>Order Feedback & Reviews</span>
+                    </h2>
+
+                    {% if not user_review %}
+                        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-xs font-bold text-amber-900">Leave feedback for {% if is_client %}{{ order.freelancer.get_display_name }}{% else %}{{ order.client.get_display_name }}{% endif %}</h3>
+                                <p class="text-[11px] text-amber-700 mt-0.5">Share your experience to help build platform reputation.</p>
+                            </div>
+                            <a href="{% url 'reviews:create_review' order_id=order.id %}" class="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 shadow-sm">
+                                Write Review
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 mb-4">
+                            <span class="text-xs font-bold text-slate-700">Your Review ({{ user_review.rating }}★):</span>
+                            <p class="text-xs text-slate-600 mt-1 leading-relaxed">{{ user_review.comment }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if other_review %}
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                            <span class="text-xs font-bold text-slate-700">Review from {% if is_client %}{{ order.freelancer.get_display_name }}{% else %}{{ order.client.get_display_name }}{% endif %} ({{ other_review.rating }}★):</span>
+                            <p class="text-xs text-slate-600 mt-1 leading-relaxed">{{ other_review.comment }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+        </div>
+
+        <!-- Right Col: Financial Escrow Card & Counterparty -->
+        <div class="space-y-6">
+
+            <!-- Financial Statement Card -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-4 flex items-center space-x-1.5">
+                    <i data-lucide="receipt" class="w-4 h-4 text-brand-600"></i>
+                    <span>Escrow Financial Statement</span>
+                </h3>
+
+                <div class="space-y-2.5 text-xs">
+                    <div class="flex justify-between py-1.5 border-b border-slate-100">
+                        <span class="text-slate-500">Gross Total:</span>
+                        <strong class="text-slate-900">${{ order.total_amount }}</strong>
+                    </div>
+                    <div class="flex justify-between py-1.5 border-b border-slate-100">
+                        <span class="text-slate-500">Platform Fee (10%):</span>
+                        <span class="text-slate-700 font-semibold">${{ order.platform_fee }}</span>
+                    </div>
+                    <div class="flex justify-between py-1.5">
+                        <span class="text-slate-700 font-bold">Freelancer Payout:</span>
+                        <strong class="text-emerald-600 font-extrabold text-sm">${{ order.freelancer_payout }}</strong>
+                    </div>
+                </div>
+
+                <!-- Escrow Status Badge -->
+                <div class="mt-4 pt-4 border-t border-slate-100">
+                    <span class="text-[11px] text-slate-400 block mb-1">Escrow Status:</span>
+                    <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold
+                        {% if payment.status == 'released' %}bg-emerald-100 text-emerald-800
+                        {% elif payment.status == 'held_in_escrow' %}bg-indigo-100 text-indigo-800
+                        {% else %}bg-slate-200 text-slate-700{% endif %}">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                        <span>{{ payment.get_status_display|default:"Held in Safe Escrow" }}</span>
+                    </span>
+                    {% if payment %}
+                        <p class="text-[10px] text-slate-400 mt-2">Txn: {{ payment.transaction_id }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Counterparty Profile Card -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-4">
+                    {% if is_client %}Developer Contact{% else %}Client Contact{% endif %}
+                </h3>
+
+                {% with counterparty=order.freelancer|default:order.client %}
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-xs">
+                            {% if is_client %}
+                                {{ order.freelancer.username|slice:":2"|upper }}
+                            {% else %}
+                                {{ order.client.username|slice:":2"|upper }}
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-900">
+                                {% if is_client %}
+                                    <a href="{% url 'accounts:freelancer_profile' username=order.freelancer.username %}" target="_blank" class="hover:text-brand-600">
+                                        {{ order.freelancer.get_display_name }}
+                                    </a>
+                                {% else %}
+                                    {{ order.client.get_display_name }}
+                                {% endif %}
+                            </h4>
+                            <p class="text-xs text-slate-500">
+                                {% if is_client %}@{{ order.freelancer.username }}{% else %}@{{ order.client.username }}{% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-100">
+                        <a href="{% url 'messaging:start_conversation' username=order.freelancer.username|default:order.client.username %}?project_id={{ order.project.id }}" class="w-full inline-flex items-center justify-center space-x-2 py-2 px-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+                            <i data-lucide="message-square" class="w-3.5 h-3.5 text-slate-500"></i>
+                            <span>Direct Chat</span>
+                        </a>
+                    </div>
+                {% endwith %}
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+

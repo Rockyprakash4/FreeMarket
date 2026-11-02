@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}My Orders & Engagements — DevMarket{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-5 border-b border-slate-200">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Orders & Contracts</h1>
+            <p class="text-sm text-slate-500 mt-1">Track active deliveries, milestone approvals, and escrow status.</p>
+        </div>
+
+        <!-- Filter tabs -->
+        <div class="flex items-center space-x-1.5 text-xs font-semibold bg-white p-1 rounded-xl border border-slate-200">
+            <a href="{% url 'orders:order_list' %}" class="px-3 py-1.5 rounded-lg {% if not selected_status %}bg-brand-600 text-white{% else %}text-slate-600 hover:text-slate-900{% endif %}">
+                All
+            </a>
+            <a href="{% url 'orders:order_list' %}?status=active" class="px-3 py-1.5 rounded-lg {% if selected_status == 'active' %}bg-brand-600 text-white{% else %}text-slate-600 hover:text-slate-900{% endif %}">
+                In Progress
+            </a>
+            <a href="{% url 'orders:order_list' %}?status=delivered" class="px-3 py-1.5 rounded-lg {% if selected_status == 'delivered' %}bg-brand-600 text-white{% else %}text-slate-600 hover:text-slate-900{% endif %}">
+                Delivered
+            </a>
+            <a href="{% url 'orders:order_list' %}?status=completed" class="px-3 py-1.5 rounded-lg {% if selected_status == 'completed' %}bg-brand-600 text-white{% else %}text-slate-600 hover:text-slate-900{% endif %}">
+                Completed
+            </a>
+        </div>
+    </div>
+
+    <div class="space-y-4">
+        {% for order in orders %}
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:border-slate-300 transition-all duration-200">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-1.5">
+                            <span class="text-xs font-bold text-slate-400">Order #{{ order.id }}</span>
+                            <span class="px-2.5 py-0.5 rounded text-[11px] font-semibold
+                                {% if order.status == 'delivered' %}bg-amber-100 text-amber-800 animate-pulse
+                                {% elif order.status == 'active' %}bg-indigo-100 text-indigo-800
+                                {% elif order.status == 'completed' %}bg-emerald-100 text-emerald-800
+                                {% else %}bg-slate-200 text-slate-700{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </div>
+
+                        <h2 class="text-base font-bold text-slate-900 hover:text-brand-600 transition-colors">
+                            <a href="{% url 'orders:order_detail' order_id=order.id %}">
+                                {{ order.project.title }}
+                            </a>
+                        </h2>
+
+                        <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-2">
+                            {% if user == order.client %}
+                                <span>Developer: <strong class="text-slate-800">{{ order.freelancer.get_display_name }}</strong></span>
+                            {% else %}
+                                <span>Client: <strong class="text-slate-800">{{ order.client.get_display_name }}</strong></span>
+                            {% endif %}
+                            <span>•</span>
+                            <span>Started: {{ order.created_at|date:"M d, Y" }}</span>
+                            {% if order.delivered_at %}
+                                <span>•</span>
+                                <span>Delivered: {{ order.delivered_at|date:"M d" }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="flex sm:flex-col items-center sm:items-end justify-between flex-shrink-0 pt-3 sm:pt-0 border-t sm:border-0 border-slate-100">
+                        <span class="text-2xl font-extrabold text-slate-900">${{ order.total_amount }}</span>
+                        <a href="{% url 'orders:order_detail' order_id=order.id %}" class="mt-2 px-4 py-2 rounded-xl text-xs font-semibold text-brand-600 bg-brand-50 hover:bg-brand-100 transition-colors">
+                            View Order Details &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center py-16 bg-white rounded-3xl border border-dashed border-slate-300">
+                <i data-lucide="package" class="w-10 h-10 text-slate-300 mx-auto mb-3"></i>
+                <h3 class="text-sm font-bold text-slate-800">No orders found</h3>
+                <p class="text-xs text-slate-500 mt-1">Active and completed work engagements will be listed here.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}Proposals for {{ project.title }} — DevMarket{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <!-- Header -->
+    <div class="mb-8 pb-5 border-b border-slate-200">
+        <a href="{% url 'marketplace:project_detail' project_id=project.id %}" class="text-xs font-semibold text-brand-600 hover:underline">
+            &larr; Back to Project View
+        </a>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Applicant Proposals</h1>
+                <p class="text-sm text-slate-500 mt-1">Review candidates and choose the right developer for: <strong class="text-slate-800">{{ project.title }}</strong></p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-700">
+                    {{ proposals.count }} Total Applicants
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Proposals List -->
+    <div class="space-y-6">
+        {% for proposal in proposals %}
+            <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm {% if proposal.status == 'accepted' %}ring-2 ring-emerald-500{% endif %}">
+                <div class="flex flex-col lg:flex-row items-start justify-between gap-6">
+
+                    <!-- Left: Freelancer Details & Cover Letter -->
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-3.5 mb-3">
+                            <div class="w-12 h-12 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-sm ring-2 ring-brand-500/20">
+                                {% if proposal.freelancer.avatar %}
+                                    <img src="{{ proposal.freelancer.avatar.url }}" alt="{{ proposal.freelancer.username }}" class="w-full h-full rounded-full object-cover">
+                                {% else %}
+                                    {{ proposal.freelancer.username|slice:":2"|upper }}
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-slate-900">
+                                    <a href="{% url 'accounts:freelancer_profile' username=proposal.freelancer.username %}" target="_blank" class="hover:text-brand-600 inline-flex items-center space-x-1">
+                                        <span>{{ proposal.freelancer.get_display_name }}</span>
+                                        <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-400"></i>
+                                    </a>
+                                </h3>
+                                <p class="text-xs text-brand-700 font-semibold">{{ proposal.freelancer.profile.headline|default:"Software Engineer" }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Rating & Skills -->
+                        <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 mb-4">
+                            <span class="flex items-center space-x-1 text-amber-500 font-bold">
+                                <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400 text-amber-400"></i>
+                                <span class="text-slate-800">{{ proposal.freelancer.profile.rating|default:"5.0" }}</span>
+                                <span class="text-slate-400 font-normal">({{ proposal.freelancer.profile.reviews_count }})</span>
+                            </span>
+                            <span>•</span>
+                            <span>Rate: ${{ proposal.freelancer.profile.hourly_rate }}/hr</span>
+                            <span>•</span>
+                            <span>Applied {{ proposal.created_at|timesince }} ago</span>
+                        </div>
+
+                        <!-- Cover Letter -->
+                        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Proposal Pitch & Approach:</h4>
+                            <p class="text-xs text-slate-700 whitespace-pre-line leading-relaxed">
+                                {{ proposal.cover_letter }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Right: Financial Bid & Accept Action -->
+                    <div class="flex flex-col items-start lg:items-end w-full lg:w-64 pt-4 lg:pt-0 border-t lg:border-0 border-slate-100 flex-shrink-0">
+                        <span class="text-3xl font-extrabold text-slate-900">${{ proposal.proposed_price }}</span>
+                        <span class="text-xs text-slate-500 mt-1">Delivery in <strong class="text-slate-800">{{ proposal.estimated_delivery_days }} days</strong></span>
+
+                        <div class="mt-2 text-[11px] text-slate-400">
+                            <span>Status:</span>
+                            <span class="font-semibold uppercase tracking-wider ml-1
+                                {% if proposal.status == 'accepted' %}text-emerald-600
+                                {% elif proposal.status == 'rejected' %}text-rose-600
+                                {% else %}text-amber-600{% endif %}">
+                                {{ proposal.get_status_display }}
+                            </span>
+                        </div>
+
+                        <div class="mt-6 flex flex-col w-full space-y-2">
+                            {% if proposal.status == 'pending' and project.is_open %}
+                                <a href="{% url 'proposals:proposal_accept' proposal_id=proposal.id %}" class="w-full text-center px-4 py-2.5 rounded-xl font-semibold text-xs text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-colors">
+                                    Accept & Fund Escrow
+                                </a>
+                                <a href="{% url 'messaging:start_conversation' username=proposal.freelancer.username %}?project_id={{ project.id }}" class="w-full text-center px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
+                                    Message Developer
+                                </a>
+                                <a href="{% url 'proposals:proposal_reject' proposal_id=proposal.id %}" class="w-full text-center py-1.5 text-xs font-medium text-rose-600 hover:underline">
+                                    Decline Proposal
+                                </a>
+                            {% elif proposal.status == 'accepted' %}
+                                <span class="w-full text-center py-2 px-3 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold border border-emerald-200">
+                                    ✓ Accepted Proposal
+                                </span>
+                                {% if project.order %}
+                                    <a href="{% url 'orders:order_detail' order_id=project.order.id %}" class="w-full text-center py-2 text-xs font-semibold text-brand-600 hover:underline">
+                                        Go to Order #{{ project.order.id }} &rarr;
+                                    </a>
+                                {% endif %}
+                            {% else %}
+                                <span class="w-full text-center py-2 px-3 bg-slate-100 text-slate-500 rounded-xl text-xs font-medium">
+                                    {{ proposal.get_status_display }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center py-16 bg-white rounded-3xl border border-dashed border-slate-300">
+                <i data-lucide="inbox" class="w-10 h-10 text-slate-300 mx-auto mb-3"></i>
+                <h3 class="text-sm font-bold text-slate-800">No proposals received yet</h3>
+                <p class="text-xs text-slate-500 mt-1">Developers will see your project in the marketplace and submit applications.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
+

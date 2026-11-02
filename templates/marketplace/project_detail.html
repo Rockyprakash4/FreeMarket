@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.title }} — DevMarket{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <!-- Top Navigation / Breadcrumb -->
+    <div class="flex items-center space-x-2 text-xs text-slate-500 mb-6">
+        <a href="{% url 'marketplace:project_list' %}" class="hover:text-slate-800">Projects</a>
+        <span>/</span>
+        <span class="text-slate-700 font-medium truncate max-w-md">{{ project.title }}</span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Left 2 Cols: Main Content -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Project Overview Card -->
+            <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+                <!-- Status & Category Badges -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-slate-100">
+                    <div class="flex items-center space-x-2">
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-700">
+                            {{ project.category.name|default:"Software Development" }}
+                        </span>
+                        <span class="px-2.5 py-0.5 rounded text-xs font-semibold
+                            {% if project.status == 'open' %}bg-emerald-100 text-emerald-800
+                            {% elif project.status == 'in_progress' %}bg-indigo-100 text-indigo-800
+                            {% elif project.status == 'completed' %}bg-slate-200 text-slate-700
+                            {% else %}bg-rose-100 text-rose-800{% endif %}">
+                            {{ project.get_status_display }}
+                        </span>
+                    </div>
+
+                    <span class="text-xs text-slate-400">
+                        Posted {{ project.created_at|date:"M d, Y" }}
+                    </span>
+                </div>
+
+                <!-- Title -->
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-4">
+                    {{ project.title }}
+                </h1>
+
+                <!-- Key Metrics Header -->
+                <div class="grid grid-cols-3 gap-4 py-4 my-6 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold uppercase">Budget</p>
+                        <p class="text-xl font-extrabold text-slate-900 mt-0.5">${{ project.budget }}</p>
+                        <p class="text-[10px] text-slate-500">{{ project.get_project_type_display }}</p>
+                    </div>
+                    <div class="border-x border-slate-200">
+                        <p class="text-xs text-slate-400 font-semibold uppercase">Proposals</p>
+                        <p class="text-xl font-extrabold text-slate-900 mt-0.5">{{ project.proposals_count }}</p>
+                        <p class="text-[10px] text-slate-500">Submitted</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold uppercase">Deadline</p>
+                        <p class="text-xl font-extrabold text-slate-900 mt-0.5">{{ project.deadline|date:"M d"|default:"Flexible" }}</p>
+                        <p class="text-[10px] text-slate-500">{{ project.deadline|timeuntil|default:"" }}</p>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Project Requirements & Scope</h2>
+                    <div class="prose prose-sm text-slate-700 leading-relaxed whitespace-pre-line">
+                        {{ project.description }}
+                    </div>
+                </div>
+
+                <!-- Required Skills -->
+                <div class="mt-8 pt-6 border-t border-slate-100">
+                    <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Required Technical Skills</h2>
+                    <div class="flex flex-wrap gap-2">
+                        {% for skill in project.get_skills_list %}
+                            <span class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-800 text-xs font-semibold">
+                                {{ skill }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proposal Submission or Status Section -->
+            {% if is_owner %}
+                <!-- Owner Management View -->
+                <div class="bg-indigo-50/70 rounded-2xl border border-indigo-200 p-6 sm:p-8">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-base font-bold text-indigo-950">You are the Owner of this Project</h2>
+                            <p class="text-xs text-indigo-700 mt-1">Review applicant proposals, accept an offer to start work, or update project settings.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="{% url 'proposals:project_proposals' project_id=project.id %}" class="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-colors">
+                                View Proposals ({{ project.proposals_count }})
+                            </a>
+                            {% if project.status == 'open' %}
+                                <a href="{% url 'marketplace:project_edit' project_id=project.id %}" class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-colors">
+                                    Edit
+                                </a>
+                                <a href="{% url 'marketplace:project_close' project_id=project.id %}" class="px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors">
+                                    Close
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+            {% elif user_proposal %}
+                <!-- Already Submitted Proposal Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i>
+                            <h2 class="text-base font-bold text-slate-900">Your Proposal Has Been Submitted</h2>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded text-xs font-semibold
+                            {% if user_proposal.status == 'pending' %}bg-amber-100 text-amber-800
+                            {% elif user_proposal.status == 'accepted' %}bg-emerald-100 text-emerald-800
+                            {% else %}bg-slate-200 text-slate-700{% endif %}">
+                            {{ user_proposal.get_status_display }}
+                        </span>
+                    </div>
+
+                    <div class="mt-4 grid grid-cols-2 gap-4 text-xs">
+                        <div>
+                            <span class="text-slate-400">Your Bid:</span>
+                            <strong class="text-slate-900 font-bold block text-base mt-0.5">${{ user_proposal.proposed_price }}</strong>
+                        </div>
+                        <div>
+                            <span class="text-slate-400">Estimated Delivery:</span>
+                            <strong class="text-slate-900 font-bold block text-base mt-0.5">{{ user_proposal.estimated_delivery_days }} days</strong>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-slate-100">
+                        <span class="text-xs font-semibold text-slate-500 block mb-1">Cover Note:</span>
+                        <p class="text-xs text-slate-700 whitespace-pre-line leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            {{ user_proposal.cover_letter }}
+                        </p>
+                    </div>
+
+                    {% if user_proposal.status == 'pending' %}
+                        <div class="mt-5 flex justify-end">
+                            <a href="{% url 'proposals:proposal_withdraw' proposal_id=user_proposal.id %}" class="text-xs font-semibold text-rose-600 hover:underline">
+                                Withdraw Proposal
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+
+            {% elif project.is_open and user.is_authenticated and user.role == user.Role.FREELANCER %}
+                <!-- Proposal Submission Form -->
+                <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-900 mb-1 flex items-center space-x-2">
+                        <i data-lucide="send" class="w-5 h-5 text-brand-600"></i>
+                        <span>Submit a Proposal for this Project</span>
+                    </h2>
+                    <p class="text-xs text-slate-500 mb-6">Propose your price and delivery timeline. Funds will be held in safe mock escrow upon acceptance.</p>
+
+                    <form action="{% url 'proposals:proposal_submit' project_id=project.id %}" method="POST" class="space-y-4">
+                        {% csrf_token %}
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Your Total Bid ($ USD)</label>
+                                {{ proposal_form.proposed_price }}
+                                <p class="text-[11px] text-slate-400 mt-1">Platform fee: 10% on completion</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Delivery Time (Days)</label>
+                                {{ proposal_form.estimated_delivery_days }}
+                                <p class="text-[11px] text-slate-400 mt-1">Estimated working days to complete</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Cover Letter & Approach</label>
+                            {{ proposal_form.cover_letter }}
+                        </div>
+
+                        <div class="pt-2 flex justify-end">
+                            <button type="submit" class="px-6 py-2.5 rounded-xl font-semibold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-colors">
+                                Submit Proposal to Client
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            {% elif not user.is_authenticated %}
+                <div class="p-6 bg-slate-100 rounded-2xl border border-slate-200 text-center">
+                    <p class="text-sm font-semibold text-slate-800">Interested in this project?</p>
+                    <p class="text-xs text-slate-500 mt-1">Sign in with a freelancer account to submit your proposal.</p>
+                    <div class="mt-4 flex justify-center space-x-3">
+                        <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn-primary text-xs">Sign In</a>
+                        <a href="{% url 'accounts:register' %}?role=freelancer" class="btn-secondary text-xs">Register as Freelancer</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Col: Client Sidebar & Trust Guarantee -->
+        <div class="space-y-6">
+            <!-- Client Info Card -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-4">About the Client</h3>
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-xs">
+                        {{ project.client.username|slice:":2"|upper }}
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900">{{ project.client.get_display_name }}</h4>
+                        <p class="text-xs text-slate-500">Member since {{ project.client.date_joined|date:"M Y" }}</p>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-slate-100 space-y-2 text-xs">
+                    {% if project.client.location %}
+                        <div class="flex justify-between text-slate-600">
+                            <span>Location:</span>
+                            <strong class="text-slate-800">{{ project.client.location }}</strong>
+                        </div>
+                    {% endif %}
+                    <div class="flex justify-between text-slate-600">
+                        <span>Projects Posted:</span>
+                        <strong class="text-slate-800">{{ project.client.projects_posted.count }}</strong>
+                    </div>
+                    <div class="flex justify-between text-slate-600">
+                        <span>Total Spent:</span>
+                        <strong class="text-slate-800">${{ project.client.profile.total_spent|default:"0.00" }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trust Card -->
+            <div class="bg-slate-900 text-white rounded-2xl p-6 shadow-sm">
+                <div class="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                    <span>DevMarket Protection</span>
+                </div>
+                <h3 class="text-sm font-bold mt-2">100% Mock Escrow Guarantee</h3>
+                <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                    Client funds are held safely until project deliverables are submitted and approved. If milestones are not met, refund disputes are supported.
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+

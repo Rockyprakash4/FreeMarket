@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DevMarket — Freelance Marketplace for Developers & Clients{% endblock %}</title>
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons via unpkg -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Compiled Tailwind CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="flex flex-col min-h-screen text-slate-800 antialiased font-sans selection:bg-brand-500 selection:text-white">
+
+    <!-- Top Navigation -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Brand Logo -->
+                <div class="flex items-center space-x-8">
+                    <a href="{% url 'core:home' %}" class="flex items-center space-x-2.5 group">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-700 via-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-sm shadow-brand-500/20 group-hover:scale-105 transition-transform duration-150">
+                            <i data-lucide="layers" class="w-5 h-5"></i>
+                        </div>
+                        <span class="text-xl font-bold tracking-tight text-slate-900 group-hover:text-brand-600 transition-colors">Dev<span class="text-brand-600">Market</span></span>
+                    </a>
+
+                    <!-- Desktop Primary Nav -->
+                    <nav class="hidden md:flex items-center space-x-1">
+                        <a href="{% url 'marketplace:project_list' %}" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-colors">
+                            Explore Projects
+                        </a>
+                        <a href="{% url 'accounts:freelancer_list' %}" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-colors">
+                            Find Developers
+                        </a>
+                        <a href="{% url 'core:about' %}" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-colors">
+                            How It Works
+                        </a>
+                    </nav>
+                </div>
+
+                <!-- Right Action / User Menu -->
+                <div class="flex items-center space-x-3">
+                    {% if user.is_authenticated %}
+                        {% if user.role == user.Role.CLIENT or user.is_superuser %}
+                            <a href="{% url 'marketplace:project_create' %}" class="hidden sm:inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-lg text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-all duration-150">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                                <span>Post Project</span>
+                            </a>
+                        {% else %}
+                            <a href="{% url 'marketplace:project_list' %}" class="hidden sm:inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-lg text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-all duration-150">
+                                <i data-lucide="search" class="w-4 h-4"></i>
+                                <span>Find Projects</span>
+                            </a>
+                        {% endif %}
+
+                        <!-- Messaging Shortcut -->
+                        <a href="{% url 'messaging:conversation_list' %}" class="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors relative" title="Messages">
+                            <i data-lucide="message-square" class="w-5 h-5"></i>
+                        </a>
+
+                        <!-- Notifications Bell -->
+                        <a href="{% url 'notifications:notification_list' %}" class="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors relative" title="Notifications">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            {% if unread_notifications_count > 0 %}
+                                <span class="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white">
+                                    {{ unread_notifications_count }}
+                                </span>
+                            {% endif %}
+                        </a>
+
+                        <!-- User Profile Dropdown Button -->
+                        <div class="relative" id="userMenuContainer">
+                            <button type="button" id="userMenuBtn" class="flex items-center space-x-2 p-1.5 rounded-lg hover:bg-slate-100 border border-transparent focus:border-slate-300 transition-colors">
+                                <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-xs ring-2 ring-white">
+                                    {% if user.avatar %}
+                                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="w-full h-full rounded-full object-cover">
+                                    {% else %}
+                                        {{ user.username|slice:":2"|upper }}
+                                    {% endif %}
+                                </div>
+                                <span class="hidden sm:inline-block text-xs font-semibold text-slate-700">{{ user.username }}</span>
+                                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <div id="userMenuDropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-50">
+                                <div class="px-4 py-2 border-b border-slate-100">
+                                    <p class="text-xs text-slate-400">Signed in as</p>
+                                    <p class="text-sm font-bold text-slate-800 truncate">{{ user.get_display_name }}</p>
+                                    <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider {% if user.is_client %}bg-indigo-50 text-indigo-700{% else %}bg-emerald-50 text-emerald-700{% endif %}">
+                                        {{ user.get_role_display }}
+                                    </span>
+                                </div>
+
+                                <a href="{% url 'core:dashboard' %}" class="flex items-center space-x-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-600 transition-colors">
+                                    <i data-lucide="layout-dashboard" class="w-4 h-4 text-slate-400"></i>
+                                    <span>Dashboard</span>
+                                </a>
+
+                                <a href="{% url 'orders:order_list' %}" class="flex items-center space-x-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-600 transition-colors">
+                                    <i data-lucide="briefcase" class="w-4 h-4 text-slate-400"></i>
+                                    <span>My Orders</span>
+                                </a>
+
+                                <a href="{% url 'payments:payment_list' %}" class="flex items-center space-x-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-600 transition-colors">
+                                    <i data-lucide="shield-check" class="w-4 h-4 text-slate-400"></i>
+                                    <span>Escrow & Payments</span>
+                                </a>
+
+                                {% if user.is_freelancer %}
+                                    <a href="{% url 'accounts:freelancer_profile' username=user.username %}" class="flex items-center space-x-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-600 transition-colors">
+                                        <i data-lucide="user" class="w-4 h-4 text-slate-400"></i>
+                                        <span>View Public Profile</span>
+                                    </a>
+                                {% endif %}
+
+                                <a href="{% url 'accounts:profile_edit' %}" class="flex items-center space-x-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-600 transition-colors">
+                                    <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
+                                    <span>Profile Settings</span>
+                                </a>
+
+                                {% if user.is_staff %}
+                                    <a href="{% url 'admin:index' %}" target="_blank" class="flex items-center space-x-2.5 px-4 py-2 text-sm text-purple-700 hover:bg-purple-50 transition-colors">
+                                        <i data-lucide="shield-alert" class="w-4 h-4 text-purple-500"></i>
+                                        <span>Admin Console</span>
+                                    </a>
+                                {% endif %}
+
+                                <div class="border-t border-slate-100 my-1"></div>
+
+                                <a href="{% url 'accounts:logout' %}" class="flex items-center space-x-2.5 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 transition-colors">
+                                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                                    <span>Sign Out</span>
+                                </a>
+                            </div>
+                        </div>
+
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors">
+                            Sign In
+                        </a>
+                        <a href="{% url 'accounts:register' %}" class="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-all duration-150">
+                            Join DevMarket
+                        </a>
+                    {% endif %}
+
+                    <!-- Mobile Menu Button -->
+                    <button type="button" id="mobileMenuBtn" class="md:hidden p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Drawer -->
+        <div id="mobileMenu" class="hidden md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-2">
+            <a href="{% url 'marketplace:project_list' %}" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50">
+                Explore Projects
+            </a>
+            <a href="{% url 'accounts:freelancer_list' %}" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50">
+                Find Developers
+            </a>
+            <a href="{% url 'core:about' %}" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50">
+                How It Works
+            </a>
+            {% if user.is_authenticated %}
+                <div class="border-t border-slate-100 pt-2 space-y-1">
+                    <a href="{% url 'core:dashboard' %}" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50">Dashboard</a>
+                    <a href="{% url 'orders:order_list' %}" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50">My Orders</a>
+                    <a href="{% url 'messaging:conversation_list' %}" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50">Messages</a>
+                    <a href="{% url 'notifications:notification_list' %}" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50">Notifications</a>
+                    <a href="{% url 'accounts:profile_edit' %}" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50">Profile Settings</a>
+                    <a href="{% url 'accounts:logout' %}" class="block px-3 py-2 rounded-lg text-base font-medium text-rose-600 hover:bg-rose-50">Sign Out</a>
+                </div>
+            {% else %}
+                <div class="border-t border-slate-100 pt-3 flex flex-col space-y-2">
+                    <a href="{% url 'accounts:login' %}" class="w-full text-center py-2 px-4 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50">Sign In</a>
+                    <a href="{% url 'accounts:register' %}" class="w-full text-center py-2 px-4 rounded-lg text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700">Join DevMarket</a>
+                </div>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Global Dismissible Messages / Alerts -->
+    {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
+            <div class="space-y-2">
+                {% for message in messages %}
+                    <div class="flex items-center justify-between p-4 rounded-xl border text-sm font-medium shadow-sm transition-all duration-200
+                        {% if message.tags == 'success' %}bg-emerald-50 border-emerald-200 text-emerald-800
+                        {% elif message.tags == 'error' %}bg-rose-50 border-rose-200 text-rose-800
+                        {% elif message.tags == 'warning' %}bg-amber-50 border-amber-200 text-amber-800
+                        {% else %}bg-indigo-50 border-indigo-200 text-indigo-800{% endif %}">
+                        <div class="flex items-center space-x-3">
+                            {% if message.tags == 'success' %}
+                                <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 flex-shrink-0"></i>
+                            {% elif message.tags == 'error' %}
+                                <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 flex-shrink-0"></i>
+                            {% elif message.tags == 'warning' %}
+                                <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 flex-shrink-0"></i>
+                            {% else %}
+                                <i data-lucide="info" class="w-5 h-5 text-indigo-600 flex-shrink-0"></i>
+                            {% endif %}
+                            <span>{{ message }}</span>
+                        </div>
+                        <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 ml-4">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Main Page Content Block -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Brand Info -->
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white">
+                            <i data-lucide="layers" class="w-4 h-4"></i>
+                        </div>
+                        <span class="text-lg font-bold text-white tracking-tight">DevMarket</span>
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        The trusted freelance marketplace engineered for software projects. Connect directly with verified software engineers, mobile developers, and AI builders.
+                    </p>
+                    <div class="flex items-center space-x-2 text-xs text-emerald-400 font-medium">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i>
+                        <span>Protected by Safe Mock Escrow</span>
+                    </div>
+                </div>
+
+                <!-- Explore Links -->
+                <div>
+                    <h3 class="text-xs font-semibold text-slate-200 uppercase tracking-wider">Explore</h3>
+                    <ul class="mt-4 space-y-2 text-xs">
+                        <li><a href="{% url 'marketplace:project_list' %}" class="hover:text-white transition-colors">Browse Projects</a></li>
+                        <li><a href="{% url 'accounts:freelancer_list' %}" class="hover:text-white transition-colors">Find Developers</a></li>
+                        <li><a href="{% url 'marketplace:project_list' %}?category=web-development" class="hover:text-white transition-colors">Web Development</a></li>
+                        <li><a href="{% url 'marketplace:project_list' %}?category=ai-machine-learning" class="hover:text-white transition-colors">AI & Machine Learning</a></li>
+                        <li><a href="{% url 'marketplace:project_list' %}?category=cloud-devops" class="hover:text-white transition-colors">Cloud & DevOps</a></li>
+                    </ul>
+                </div>
+
+                <!-- Platform -->
+                <div>
+                    <h3 class="text-xs font-semibold text-slate-200 uppercase tracking-wider">Platform</h3>
+                    <ul class="mt-4 space-y-2 text-xs">
+                        <li><a href="{% url 'core:about' %}" class="hover:text-white transition-colors">How DevMarket Works</a></li>
+                        <li><a href="{% url 'core:terms' %}" class="hover:text-white transition-colors">Terms of Service</a></li>
+                        <li><a href="{% url 'core:terms' %}#escrow" class="hover:text-white transition-colors">Escrow Protection Policy</a></li>
+                        <li><a href="{% url 'core:terms' %}#commission" class="hover:text-white transition-colors">10% Platform Fee Standard</a></li>
+                    </ul>
+                </div>
+
+                <!-- Security & Trust -->
+                <div>
+                    <h3 class="text-xs font-semibold text-slate-200 uppercase tracking-wider">Security & Standards</h3>
+                    <p class="mt-4 text-xs text-slate-400 leading-relaxed">
+                        Payments are safely secured in milestone escrow until project deliverables are approved by clients. No raw card storage.
+                    </p>
+                    <div class="mt-4 inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs text-slate-300">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>MongoDB Database Active</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-8 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500">
+                <p>&copy; 2026 DevMarket Platform. All rights reserved.</p>
+                <p class="mt-2 sm:mt-0">Engineered with Django, MongoDB & Tailwind CSS</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // User dropdown menu toggle
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userMenuDropdown = document.getElementById('userMenuDropdown');
+        if (userMenuBtn && userMenuDropdown) {
+            userMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userMenuDropdown.classList.toggle('hidden');
+            });
+            document.addEventListener('click', (e) => {
+                if (!userMenuDropdown.contains(e.target)) {
+                    userMenuDropdown.classList.add('hidden');
+                }
+            });
+        }
+
+        // Mobile drawer toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+

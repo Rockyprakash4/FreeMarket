@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ freelancer.get_display_name }} — DevMarket Profile{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <!-- Hero Card -->
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm">
+        <div class="flex flex-col sm:flex-row items-start justify-between gap-6">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-5">
+                <div class="w-24 h-24 rounded-2xl bg-brand-100 text-brand-700 font-extrabold text-2xl flex items-center justify-center ring-4 ring-brand-50 shadow-sm flex-shrink-0">
+                    {% if freelancer.avatar %}
+                        <img src="{{ freelancer.avatar.url }}" alt="{{ freelancer.username }}" class="w-full h-full rounded-2xl object-cover">
+                    {% else %}
+                        {{ freelancer.username|slice:":2"|upper }}
+                    {% endif %}
+                </div>
+
+                <div>
+                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">{{ freelancer.get_display_name }}</h1>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                            <i data-lucide="check" class="w-3 h-3 mr-1"></i> Verified Developer
+                        </span>
+                    </div>
+
+                    <p class="text-sm font-semibold text-brand-700 mt-1">
+                        {{ profile.headline|default:"Software Engineer" }}
+                    </p>
+
+                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-slate-500 mt-3">
+                        {% if freelancer.location %}
+                            <span class="flex items-center space-x-1">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
+                                <span>{{ freelancer.location }}</span>
+                            </span>
+                        {% endif %}
+                        <span class="flex items-center space-x-1 text-amber-500 font-bold">
+                            <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400 text-amber-400"></i>
+                            <span class="text-slate-800">{{ profile.rating|default:"5.0" }}</span>
+                            <span class="text-slate-400 font-normal">({{ profile.reviews_count }} reviews)</span>
+                        </span>
+                        <span class="flex items-center space-x-1">
+                            <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>
+                            <span>{{ profile.get_availability_display }}</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rate & CTA -->
+            <div class="flex flex-col items-center sm:items-end w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-0 border-slate-100">
+                <span class="text-3xl font-extrabold text-slate-900">
+                    ${{ profile.hourly_rate }}<span class="text-sm font-normal text-slate-500">/hr</span>
+                </span>
+
+                <div class="mt-4 flex items-center space-x-2 w-full sm:w-auto">
+                    {% if user.is_authenticated and user != freelancer %}
+                        <a href="{% url 'messaging:start_conversation' username=freelancer.username %}" class="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl font-semibold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-colors">
+                            <i data-lucide="message-square" class="w-4 h-4"></i>
+                            <span>Send Message</span>
+                        </a>
+                    {% elif not user.is_authenticated %}
+                        <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl font-semibold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-colors">
+                            <i data-lucide="message-square" class="w-4 h-4"></i>
+                            <span>Contact Developer</span>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Links Row -->
+        {% if profile.github_url or profile.portfolio_website or profile.linkedin_url %}
+            <div class="mt-6 pt-5 border-t border-slate-100 flex flex-wrap gap-4 text-xs font-semibold">
+                {% if profile.portfolio_website %}
+                    <a href="{{ profile.portfolio_website }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-1.5 text-slate-600 hover:text-brand-600">
+                        <i data-lucide="globe" class="w-4 h-4"></i>
+                        <span>Portfolio Site</span>
+                    </a>
+                {% endif %}
+                {% if profile.github_url %}
+                    <a href="{{ profile.github_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-1.5 text-slate-600 hover:text-brand-600">
+                        <i data-lucide="github" class="w-4 h-4"></i>
+                        <span>GitHub Profile</span>
+                    </a>
+                {% endif %}
+                {% if profile.linkedin_url %}
+                    <a href="{{ profile.linkedin_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-1.5 text-slate-600 hover:text-brand-600">
+                        <i data-lucide="linkedin" class="w-4 h-4"></i>
+                        <span>LinkedIn</span>
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Details Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+        <!-- Left: Bio & Skills -->
+        <div class="lg:col-span-2 space-y-8">
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+                <h2 class="text-base font-bold text-slate-900 mb-4">About Me</h2>
+                <div class="prose prose-sm text-slate-600 leading-relaxed whitespace-pre-line">
+                    {{ profile.bio|default:"No bio provided yet." }}
+                </div>
+
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mt-8 mb-3">Skills & Technologies</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for skill in profile.get_skills_list %}
+                        <span class="px-3 py-1 rounded-lg bg-slate-100 text-slate-800 text-xs font-semibold">
+                            {{ skill }}
+                        </span>
+                    {% empty %}
+                        <p class="text-xs text-slate-400">No skills listed.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Client Reviews -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+                <h2 class="text-base font-bold text-slate-900 mb-6 flex items-center justify-between">
+                    <span>Client Reviews ({{ reviews.count }})</span>
+                    <span class="text-amber-500 font-bold text-xs flex items-center space-x-1">
+                        <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400 text-amber-400"></i>
+                        <span>{{ profile.rating|default:"5.0" }} Average</span>
+                    </span>
+                </h2>
+
+                <div class="space-y-5">
+                    {% for rev in reviews %}
+                        <div class="p-4 rounded-xl border border-slate-100 bg-slate-50/60">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-900">{{ rev.reviewer.get_display_name }}</span>
+                                <div class="flex items-center space-x-1 text-amber-400">
+                                    {% for i in "12345" %}
+                                        <i data-lucide="star" class="w-3.5 h-3.5 {% if forloop.counter <= rev.rating %}fill-amber-400 text-amber-400{% else %}text-slate-200{% endif %}"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed">{{ rev.comment }}</p>
+                            <span class="text-[11px] text-slate-400 mt-2 inline-block">{{ rev.created_at|date:"M d, Y" }}</span>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-6">
+                            <p class="text-xs text-slate-400">No reviews recorded yet.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Stats & Completed Engagements -->
+        <div class="space-y-6">
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-4">Track Record</h3>
+                <div class="space-y-3 text-xs">
+                    <div class="flex justify-between py-2 border-b border-slate-100">
+                        <span class="text-slate-500">Experience Level:</span>
+                        <strong class="text-slate-800">{{ profile.get_experience_level_display }}</strong>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-slate-100">
+                        <span class="text-slate-500">Total Earned:</span>
+                        <strong class="text-slate-800">${{ profile.total_earned }}</strong>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-slate-100">
+                        <span class="text-slate-500">Projects Completed:</span>
+                        <strong class="text-slate-800">{{ completed_orders.count }}</strong>
+                    </div>
+                    <div class="flex justify-between py-2">
+                        <span class="text-slate-500">Member Since:</span>
+                        <strong class="text-slate-800">{{ freelancer.date_joined|date:"M Y" }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Completed Projects -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-4">Completed Deliveries</h3>
+                <div class="space-y-3">
+                    {% for order in completed_orders %}
+                        <div class="p-3 rounded-lg border border-slate-100 bg-slate-50">
+                            <p class="text-xs font-bold text-slate-900 line-clamp-1">{{ order.project.title }}</p>
+                            <span class="text-[11px] text-emerald-600 font-semibold mt-1 inline-block">✓ Approved Delivery</span>
+                        </div>
+                    {% empty %}
+                        <p class="text-xs text-slate-400">First completed order will appear here.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+

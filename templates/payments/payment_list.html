@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Escrow & Payments Ledger — DevMarket{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="mb-8 pb-5 border-b border-slate-200">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Escrow & Financial Ledger</h1>
+        <p class="text-sm text-slate-500 mt-1">Full transparency on escrow locks, 10% platform fees, and developer payouts.</p>
+    </div>
+
+    <!-- Safe Mock Mode Indicator Banner -->
+    <div class="mb-8 p-4 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center flex-shrink-0">
+                <i data-lucide="shield-check" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-indigo-950">Development & Testing Mode Active</p>
+                <p class="text-[11px] text-indigo-700">Platform payments are currently simulated via DevMarket Safe Mock Escrow. No real credit card charges occur.</p>
+            </div>
+        </div>
+        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-200/70 text-indigo-900">
+            Mock Mode
+        </span>
+    </div>
+
+    <!-- Payments Table -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-200 bg-slate-50/75 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        <th class="py-3.5 px-6">Transaction ID</th>
+                        <th class="py-3.5 px-6">Project / Order</th>
+                        <th class="py-3.5 px-6">Total Amount</th>
+                        <th class="py-3.5 px-6">Platform Fee (10%)</th>
+                        <th class="py-3.5 px-6">Net Payout</th>
+                        <th class="py-3.5 px-6">Escrow Status</th>
+                        <th class="py-3.5 px-6">Date</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-xs">
+                    {% for p in payments %}
+                        <tr class="hover:bg-slate-50/60 transition-colors">
+                            <td class="py-4 px-6 font-mono text-slate-700 font-medium">{{ p.transaction_id }}</td>
+                            <td class="py-4 px-6 font-semibold text-slate-900">
+                                <a href="{% url 'orders:order_detail' order_id=p.order.id %}" class="hover:text-brand-600">
+                                    {{ p.order.project.title }}
+                                </a>
+                            </td>
+                            <td class="py-4 px-6 font-bold text-slate-900">${{ p.amount }}</td>
+                            <td class="py-4 px-6 text-slate-500 font-medium">${{ p.platform_fee }}</td>
+                            <td class="py-4 px-6 font-extrabold text-emerald-600">${{ p.net_payout }}</td>
+                            <td class="py-4 px-6">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold
+                                    {% if p.status == 'released' %}bg-emerald-100 text-emerald-800
+                                    {% elif p.status == 'held_in_escrow' %}bg-indigo-100 text-indigo-800
+                                    {% else %}bg-slate-100 text-slate-700{% endif %}">
+                                    {{ p.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-slate-400">{{ p.created_at|date:"M d, Y" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="py-12 text-center text-slate-400 text-xs">
+                                No escrow payment transactions on record yet.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
