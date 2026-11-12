@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
@@ -19,6 +20,9 @@ class User(AbstractUser):
     phone = models.CharField(max_length=20, blank=True, null=True)
     location = models.CharField(max_length=100, blank=True, null=True)
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
+    is_verified = models.BooleanField(
+        default=False, help_text="Email and identity verification flag"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -46,6 +50,12 @@ class Profile(models.Model):
         FULL_TIME = "full_time", "Available Full-Time (40 hrs/wk)"
         PART_TIME = "part_time", "Available Part-Time (20 hrs/wk)"
         BUSY = "busy", "Not Available Currently"
+
+    class VerificationStatus(models.TextChoices):
+        UNVERIFIED = "unverified", "Unverified"
+        PENDING = "pending", "Verification Pending Review"
+        VERIFIED = "verified", "Identity Verified"
+        REJECTED = "rejected", "Verification Rejected"
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     headline = models.CharField(
@@ -76,10 +86,31 @@ class Profile(models.Model):
     portfolio_website = models.URLField(blank=True, null=True)
     github_url = models.URLField(blank=True, null=True)
     linkedin_url = models.URLField(blank=True, null=True)
+    resume = models.FileField(upload_to="resumes/", blank=True, null=True)
+    resume_text = models.TextField(blank=True, default="")
+    verification_status = models.CharField(
+        max_length=20,
+        choices=VerificationStatus.choices,
+        default=VerificationStatus.UNVERIFIED,
+    )
+    verification_document = models.FileField(
+        upload_to="verifications/", blank=True, null=True
+    )
+    ai_profile_score = models.PositiveSmallIntegerField(
+        default=50, help_text="AI evaluated profile completeness score (0-100)"
+    )
+    ai_suggestions = models.TextField(
+        blank=True,
+        default="",
+        help_text="AI recommendations for profile and skill improvements",
+    )
+    saved_freelancers = models.ManyToManyField(
+        User, related_name="shortlisted_by", blank=True
+    )
     rating = models.FloatField(default=0.0)
     reviews_count = models.PositiveIntegerField(default=0)
-    total_earned = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    total_spent = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    total_earned = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    total_spent = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
 
     def __str__(self):
         return f"{self.user.username}'s Profile"

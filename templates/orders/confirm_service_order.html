@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirm Order — SkillSphere{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+    <div class="mb-8">
+        <a href="{% url 'marketplace:service_detail' service_id=service.id %}" class="inline-flex items-center space-x-1 text-xs font-semibold text-slate-500 hover:text-slate-800 mb-2">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            <span>Cancel and return</span>
+        </a>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Review & Secure Escrow Order</h1>
+        <p class="text-sm text-slate-500 mt-1">Review the package details before locking the payment into SkillSphere's secured escrow protection.</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6 sm:p-8">
+
+        <!-- Service Summary -->
+        <div class="pb-6 border-b border-slate-200">
+            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 mb-2">
+                {{ service.category.name|default:"Software Package" }}
+            </span>
+            <h2 class="text-lg font-bold text-slate-900">{{ service.title }}</h2>
+            <div class="flex items-center space-x-3 text-xs text-slate-500 mt-2">
+                <span>Seller: <strong class="text-slate-800">{{ service.freelancer.get_display_name }}</strong></span>
+                <span>•</span>
+                <span>Estimated Turnaround: <strong class="text-slate-800">{{ service.delivery_time_days }} days</strong></span>
+            </div>
+        </div>
+
+        <!-- Payment Breakdown -->
+        <div class="py-6 border-b border-slate-200 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Escrow Payment Breakdown</h3>
+
+            <div class="flex items-center justify-between text-sm text-slate-600">
+                <span>Service Price</span>
+                <span class="font-bold text-slate-900">${{ total_amount }}</span>
+            </div>
+
+            <div class="flex items-center justify-between text-sm text-slate-600">
+                <span>Platform Commission (10%)</span>
+                <span class="font-bold text-emerald-700">${{ platform_fee }}</span>
+            </div>
+
+            <div class="flex items-center justify-between text-sm text-slate-600">
+                <span>Freelancer Net Escrow Payout (90%)</span>
+                <span class="font-bold text-slate-700">${{ freelancer_payout }}</span>
+            </div>
+
+            <div class="flex items-center justify-between text-base font-extrabold text-slate-900 pt-3 border-t border-slate-100">
+                <span>Total Due Now (Mock Escrow Mode)</span>
+                <span class="text-xl text-brand-600">${{ total_amount }}</span>
+            </div>
+        </div>
+
+        <!-- Escrow Protection Note -->
+        <div class="my-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-start space-x-3">
+            <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+            <div>
+                <strong class="font-bold">Zero Risk Guarantee:</strong>
+                <span> Funds are held securely in the SkillSphere Escrow account. They are only released to the developer after you inspect, test, and approve the completed deliverables.</span>
+            </div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="w-full flex items-center justify-center space-x-2 px-6 py-3.5 rounded-xl font-bold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-md shadow-brand-500/20 transition-all">
+                <i data-lucide="lock" class="w-4 h-4"></i>
+                <span>Confirm Order & Secure ${{ total_amount }} in Escrow</span>
+            </button>
+        </form>
+
+    </div>
+</div>
+{% endblock %}

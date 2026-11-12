@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact & Support — SkillSphere{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center max-w-2xl mx-auto mb-12">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-200 mb-3">
+            24/7 Dedicated Support
+        </span>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">How Can We Help You?</h1>
+        <p class="text-slate-500 mt-2 text-base">Have questions about escrow payments, project disputes, developer verification, or account settings? Our team is here to assist.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Contact Information Cards -->
+        <div class="space-y-4">
+            <div class="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center mb-3">
+                    <i data-lucide="mail" class="w-5 h-5"></i>
+                </div>
+                <h3 class="text-sm font-bold text-slate-900">Email Inquiries</h3>
+                <p class="text-xs text-slate-500 mt-1">Direct support inquiries and technical questions.</p>
+                <a href="mailto:support@skillsphere.io" class="text-xs font-semibold text-brand-600 hover:underline mt-2 inline-block">support@skillsphere.io</a>
+            </div>
+
+            <div class="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                </div>
+                <h3 class="text-sm font-bold text-slate-900">Escrow & Disputes</h3>
+                <p class="text-xs text-slate-500 mt-1">Payment arbitration, contract milestones and refunds.</p>
+                <a href="{% url 'disputes:dispute_list' %}" class="text-xs font-semibold text-emerald-700 hover:underline mt-2 inline-block">Open Dispute Center &rarr;</a>
+            </div>
+
+            <div class="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
+                    <i data-lucide="code" class="w-5 h-5"></i>
+                </div>
+                <h3 class="text-sm font-bold text-slate-900">Developer Relations</h3>
+                <p class="text-xs text-slate-500 mt-1">Badge verification, skill assessments and resume indexing.</p>
+                <a href="{% url 'accounts:freelancer_list' %}" class="text-xs font-semibold text-indigo-700 hover:underline mt-2 inline-block">Browse Directory &rarr;</a>
+            </div>
+        </div>
+
+        <!-- Contact Form -->
+        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+            <h2 class="text-xl font-bold text-slate-900 mb-6">Send a Direct Message</h2>
+            <form method="post" action="{% url 'core:contact' %}" class="space-y-5">
+                {% csrf_token %}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="name" class="block text-xs font-semibold text-slate-700 mb-1">Your Full Name</label>
+                        <input type="text" id="name" name="name" required
+                               value="{% if user.is_authenticated %}{{ user.get_display_name }}{% endif %}"
+                               placeholder="e.g. Sarah Jenkins"
+                               class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+                        <input type="email" id="email" name="email" required
+                               value="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
+                               placeholder="e.g. sarah@example.com"
+                               class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="category" class="block text-xs font-semibold text-slate-700 mb-1">Topic Category</label>
+                    <select id="category" name="category" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white">
+                        <option value="general">General Marketplace Inquiry</option>
+                        <option value="disputes">Order Dispute & Milestone Payout</option>
+                        <option value="verification">Freelancer Identity & Badge Verification</option>
+                        <option value="technical">Bug Report or Platform Feature</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="subject" class="block text-xs font-semibold text-slate-700 mb-1">Subject</label>
+                    <input type="text" id="subject" name="subject" required
+                           placeholder="Summary of your question or issue"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                </div>
+
+                <div>
+                    <label for="message" class="block text-xs font-semibold text-slate-700 mb-1">Detailed Message</label>
+                    <textarea id="message" name="message" rows="5" required
+                              placeholder="Please describe your project, problem, or inquiry in detail..."
+                              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"></textarea>
+                </div>
+
+                <button type="submit" class="w-full inline-flex items-center justify-center space-x-2 px-6 py-3 rounded-xl font-bold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-colors">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    <span>Transmit Message to Support</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

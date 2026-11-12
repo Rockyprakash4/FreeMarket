@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard — DevMarket{% endblock %}
+{% block title %}Dashboard — SkillSphere{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -15,22 +15,44 @@
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {% if is_client %}bg-indigo-100 text-indigo-800{% else %}bg-emerald-100 text-emerald-800{% endif %}">
                     {{ user.get_role_display }}
                 </span>
+                {% if user.profile.verification_status == 'verified' %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-brand-50 text-brand-700 border border-brand-200">
+                    <i data-lucide="badge-check" class="w-3 h-3 text-brand-600 mr-1"></i> Verified
+                </span>
+                {% endif %}
             </div>
             <p class="text-sm text-slate-500 mt-1">Here is a summary of your active engagements, requests, and platform activity.</p>
         </div>
 
-        <div class="flex items-center space-x-3">
+        <div class="flex flex-wrap items-center gap-2">
             {% if is_client %}
-                <a href="{% url 'marketplace:project_create' %}" class="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl font-semibold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-colors">
+                <a href="{% url 'marketplace:project_create' %}" class="inline-flex items-center space-x-1.5 px-4 py-2.5 rounded-xl font-semibold text-xs text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-colors">
                     <i data-lucide="plus-circle" class="w-4 h-4"></i>
                     <span>Post New Project</span>
                 </a>
+                <a href="{% url 'marketplace:service_list' %}" class="inline-flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl font-semibold text-xs text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 transition-colors shadow-sm">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-brand-600"></i>
+                    <span>Explore Gigs</span>
+                </a>
             {% else %}
-                <a href="{% url 'marketplace:project_list' %}" class="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl font-semibold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-colors">
-                    <i data-lucide="search" class="w-4 h-4"></i>
-                    <span>Browse Open Projects</span>
+                <a href="{% url 'marketplace:service_create' %}" class="inline-flex items-center space-x-1.5 px-4 py-2.5 rounded-xl font-semibold text-xs text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-colors">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>Publish Service</span>
+                </a>
+                <a href="{% url 'marketplace:project_list' %}" class="inline-flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl font-semibold text-xs text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 transition-colors shadow-sm">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-500"></i>
+                    <span>Browse Projects</span>
                 </a>
             {% endif %}
+
+            <a href="{% url 'disputes:dispute_list' %}" class="inline-flex items-center space-x-1.5 px-3 py-2.5 rounded-xl font-semibold text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors" title="Disputes Desk">
+                <i data-lucide="scales" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">Disputes</span>
+            </a>
+            <a href="{% url 'payments:payment_list' %}" class="inline-flex items-center space-x-1.5 px-3 py-2.5 rounded-xl font-semibold text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors" title="Payments">
+                <i data-lucide="receipt" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">Billing</span>
+            </a>
         </div>
     </div>
 
@@ -157,7 +179,7 @@
                         <div class="text-center py-8">
                             <i data-lucide="folder-open" class="w-8 h-8 text-slate-300 mx-auto mb-2"></i>
                             <p class="text-xs text-slate-500">You haven't posted any projects yet.</p>
-                            <a href="{% url 'marketplace:project_create' %}" class="mt-3 inline-block btn-primary text-xs">Post a Project</a>
+                            <a href="{% url 'marketplace:project_create' %}" class="mt-3 inline-block px-4 py-2 rounded-xl text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700">Post a Project</a>
                         </div>
                     {% endfor %}
                 </div>
@@ -166,7 +188,7 @@
             <!-- Active Orders -->
             <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
                 <div class="flex items-center justify-between mb-5">
-                    <h2 class="text-base font-bold text-slate-900">Recent Orders</h2>
+                    <h2 class="text-base font-bold text-slate-900">Recent Contracts & Escrows</h2>
                     <a href="{% url 'orders:order_list' %}" class="text-xs font-semibold text-brand-600 hover:text-brand-700">View All</a>
                 </div>
 
@@ -177,7 +199,7 @@
                                 <div>
                                     <h3 class="text-sm font-bold text-slate-900 line-clamp-1">
                                         <a href="{% url 'orders:order_detail' order_id=ord.id %}" class="hover:text-brand-600">
-                                            {{ ord.project.title }}
+                                            {{ ord.title }}
                                         </a>
                                     </h3>
                                     <p class="text-xs text-slate-500 mt-0.5">Freelancer: {{ ord.freelancer.get_display_name }}</p>
@@ -186,6 +208,7 @@
                                     {% if ord.status == 'delivered' %}bg-amber-100 text-amber-800 animate-pulse
                                     {% elif ord.status == 'active' %}bg-indigo-100 text-indigo-800
                                     {% elif ord.status == 'completed' %}bg-emerald-100 text-emerald-800
+                                    {% elif ord.status == 'disputed' %}bg-rose-100 text-rose-800
                                     {% else %}bg-slate-200 text-slate-700{% endif %}">
                                     {{ ord.get_status_display }}
                                 </span>
@@ -193,7 +216,7 @@
                             <div class="flex items-center justify-between text-xs text-slate-500 mt-3 pt-2 border-t border-slate-200/60">
                                 <span>Total Amount: <strong class="text-slate-900 font-semibold">${{ ord.total_amount }}</strong></span>
                                 <a href="{% url 'orders:order_detail' order_id=ord.id %}" class="font-semibold text-brand-600 hover:underline">
-                                    View Order &rarr;
+                                    View Contract &rarr;
                                 </a>
                             </div>
                         </div>
@@ -201,18 +224,79 @@
                         <div class="text-center py-8">
                             <i data-lucide="package" class="w-8 h-8 text-slate-300 mx-auto mb-2"></i>
                             <p class="text-xs text-slate-500">No active orders yet.</p>
-                            <p class="text-[11px] text-slate-400 mt-1">Accept a proposal on your project to kick off an order.</p>
+                            <p class="text-[11px] text-slate-400 mt-1">Accept a proposal or order a service package to kick off an order.</p>
                         </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
 
+        <!-- Shortlisted Developers Section -->
+        {% if shortlisted %}
+        <div class="mt-8 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="bookmark" class="w-4 h-4 text-brand-600"></i>
+                    <h2 class="text-base font-bold text-slate-900">My Shortlisted Talent</h2>
+                </div>
+                <a href="{% url 'accounts:freelancer_list' %}" class="text-xs font-semibold text-brand-600 hover:underline">Browse More &rarr;</a>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {% for f in shortlisted %}
+                <div class="p-4 rounded-xl border border-slate-100 bg-slate-50/50 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center space-x-2.5 mb-2">
+                            <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-xs">
+                                {{ f.get_display_name|slice:":1" }}
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-900">{{ f.get_display_name }}</h4>
+                                <span class="text-[10px] text-slate-400 block">${{ f.profile.hourly_rate|default:"50" }}/hr</span>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-slate-600 line-clamp-1">{{ f.profile.headline|default:"Full-Stack Developer" }}</p>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-slate-200/50 flex justify-between items-center">
+                        <a href="{% url 'accounts:freelancer_profile' username=f.username %}" class="text-xs font-semibold text-brand-600 hover:underline">Profile</a>
+                        <a href="{% url 'messaging:start_conversation' recipient_id=f.id %}" class="text-xs text-slate-500 hover:text-slate-800">Message</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
     {% else %}
         <!-- FREELANCER DASHBOARD -->
 
+        <!-- AI Profile Completeness Banner -->
+        <div class="mt-6 bg-gradient-to-r from-brand-900 via-indigo-900 to-slate-900 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
+            <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <div class="flex items-center space-x-2">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/20 text-white backdrop-blur-md">
+                            <i data-lucide="cpu" class="w-3 h-3 mr-1 text-teal-300"></i> AI Talent Index
+                        </span>
+                        <span class="text-xs text-brand-200">Scoring Engine v2.0</span>
+                    </div>
+                    <h3 class="text-lg font-bold">Your Profile Strength: <span class="text-teal-300">{{ ai_score }}%</span></h3>
+                    <p class="text-xs text-slate-300 max-w-xl">
+                        {% if ai_score >= 80 %}
+                            Outstanding! Your profile is prioritized by our AI matching engine for high-budget client projects.
+                        {% else %}
+                            Upload an updated resume and add specialized tech stacks to achieve top tier match placement.
+                        {% endif %}
+                    </p>
+                </div>
+                <a href="{% url 'accounts:profile_edit' %}" class="inline-flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-900 bg-teal-300 hover:bg-teal-200 transition-colors shadow-sm flex-shrink-0">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    <span>Boost AI Score</span>
+                </a>
+            </div>
+        </div>
+
         <!-- KPI Metrics Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-6">
             <div class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Proposals</span>
@@ -274,7 +358,7 @@
                             <div>
                                 <h3 class="text-sm font-bold text-slate-900">
                                     <a href="{% url 'orders:order_detail' order_id=order.id %}" class="hover:text-brand-600">
-                                        {{ order.project.title }}
+                                        {{ order.title }}
                                     </a>
                                 </h3>
                                 <div class="flex items-center space-x-3 text-xs text-slate-500 mt-1">
@@ -295,6 +379,43 @@
                 </div>
             </div>
         {% endif %}
+
+        <!-- My Published Services (Gigs) Section -->
+        <div class="mt-8 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-brand-600"></i>
+                    <h2 class="text-base font-bold text-slate-900">My Pre-Packaged Services</h2>
+                </div>
+                <a href="{% url 'marketplace:service_create' %}" class="text-xs font-semibold text-brand-600 hover:underline">+ Publish New Service</a>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for svc in my_services %}
+                <div class="p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-slate-300 transition-all flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ svc.category.name|default:"Package" }}</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Active</span>
+                        </div>
+                        <h4 class="text-xs font-bold text-slate-900 line-clamp-1 mb-1">
+                            <a href="{% url 'marketplace:service_detail' service_id=svc.id %}" class="hover:text-brand-600">{{ svc.title }}</a>
+                        </h4>
+                        <p class="text-[11px] text-slate-500 line-clamp-2">{{ svc.description }}</p>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-slate-200/50 flex justify-between items-center text-xs">
+                        <span class="font-bold text-slate-900">${{ svc.price }} ({{ svc.delivery_time_days }}d)</span>
+                        <a href="{% url 'marketplace:service_edit' service_id=svc.id %}" class="text-brand-600 font-semibold hover:underline">Edit</a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-6">
+                    <p class="text-xs text-slate-500">You haven't published any service packages yet.</p>
+                    <a href="{% url 'marketplace:service_create' %}" class="mt-2 inline-block px-3 py-1.5 rounded-lg text-xs font-semibold text-brand-600 hover:bg-brand-50">Publish a Service Package &rarr;</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
 
         <!-- Submitted Proposals & Recommended Projects Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
@@ -331,7 +452,7 @@
                         <div class="text-center py-8">
                             <i data-lucide="file-text" class="w-8 h-8 text-slate-300 mx-auto mb-2"></i>
                             <p class="text-xs text-slate-500">You haven't submitted any proposals yet.</p>
-                            <a href="{% url 'marketplace:project_list' %}" class="mt-3 inline-block btn-primary text-xs">Explore Projects</a>
+                            <a href="{% url 'marketplace:project_list' %}" class="mt-3 inline-block px-4 py-2 rounded-xl text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700">Explore Projects</a>
                         </div>
                     {% endfor %}
                 </div>
@@ -376,4 +497,3 @@
 
 </div>
 {% endblock %}
-

@@ -9,6 +9,13 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         related_name="reviews",
     )
+    service = models.ForeignKey(
+        "marketplace.Service",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="reviews",
+    )
     reviewer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -25,6 +32,12 @@ class Review(models.Model):
         help_text="Rating between 1 and 5 stars",
     )
     comment = models.TextField()
+    is_reported = models.BooleanField(
+        default=False, help_text="Flagged for inappropriate content"
+    )
+    is_moderated = models.BooleanField(
+        default=False, help_text="Reviewed by platform administrator"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -44,7 +57,7 @@ class Review(models.Model):
         # Update reviewee's aggregate profile rating
         profile = getattr(self.reviewee, "profile", None)
         if profile:
-            reviews = Review.objects.filter(reviewee=self.reviewee)
+            reviews = Review.objects.filter(reviewee=self.reviewee, is_reported=False)
             total = reviews.count()
             if total > 0:
                 avg = sum(r.rating for r in reviews) / total

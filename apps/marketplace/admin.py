@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Project
+from .models import Category, Project, Service, SavedService
 
 
 @admin.register(Category)
@@ -16,9 +16,32 @@ class ProjectAdmin(admin.ModelAdmin):
         "client",
         "category",
         "budget",
+        "complexity",
         "project_type",
         "status",
         "created_at",
     )
-    list_filter = ("status", "project_type", "category")
+    list_filter = ("status", "project_type", "complexity", "category")
     search_fields = ("title", "description", "client__username", "required_skills")
+
+
+@admin.register(Service)
+class ServiceAdmin(admin.ModelAdmin):
+    list_display = (
+        "title",
+        "freelancer",
+        "category",
+        "price",
+        "delivery_time_days",
+        "is_active",
+        "views_count",
+        "created_at",
+    )
+    list_filter = ("is_active", "category")
+    search_fields = ("title", "description", "freelancer__username", "technologies")
+
+
+@admin.register(SavedService)
+class SavedServiceAdmin(admin.ModelAdmin):
+    list_display = ("user", "service", "created_at")
+    search_fields = ("user__username", "service__title")

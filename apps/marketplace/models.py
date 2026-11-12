@@ -10,7 +10,7 @@ class Category(models.Model):
     icon = models.CharField(
         max_length=50,
         default="code",
-        help_text="Icon identifier e.g. code, design, mobile, ai, web, devops",
+        help_text="Icon identifier e.g. code, cpu, cloud, smartphone, palette, shield",
     )
     is_featured = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
@@ -39,6 +39,11 @@ class Project(models.Model):
         FIXED = "fixed", "Fixed Price"
         HOURLY = "hourly", "Hourly Rate"
 
+    class Complexity(models.TextChoices):
+        ENTRY = "entry", "Entry (Standard)"
+        INTERMEDIATE = "intermediate", "Intermediate (Custom Logic)"
+        EXPERT = "expert", "Expert (High Architecture / Scale)"
+
     client = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -62,6 +67,12 @@ class Project(models.Model):
     deadline = models.DateField(null=True, blank=True)
     project_type = models.CharField(
         max_length=20, choices=ProjectType.choices, default=ProjectType.FIXED
+    )
+    complexity = models.CharField(
+        max_length=20, choices=Complexity.choices, default=Complexity.INTERMEDIATE
+    )
+    attachment = models.FileField(
+        upload_to="project_attachments/", blank=True, null=True
     )
     status = models.CharField(
         max_length=20, choices=Status.choices, default=Status.OPEN
@@ -88,3 +99,82 @@ class Project(models.Model):
     @property
     def is_open(self):
         return self.status == self.Status.OPEN
+
+
+class Service(models.Model):
+    """
+    Freelance Service / Gig offered directly by a developer.
+    Clients can purchase services or add them to their wishlist.
+    """
+    freelancer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="services_offered",
+    )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="services",
+    )
+    title = models.CharField(
+        max_length=200,
+        help_text="e.g. I will build a production-ready Django REST API with JWT Auth",
+    )
+    description = models.TextField(
+        help_text="Detailed description of what deliverables and revisions are included"
+    )
+    price = models.DecimalField(
+        max_digits=10, decimal_places=2, default=150.00, help_text="Price in USD"
+    )
+    delivery_time_days = models.PositiveIntegerField(
+        default=3, help_text="Expected delivery time in days"
+    )
+    technologies = models.CharField(
+        max_length=255,
+        help_text="Comma-separated technologies (e.g. Django, Python, PostgreSQL, Docker)",
+    )
+    image = models.ImageField(upload_to="services/", blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    views_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.title
+
+    def get_tech_list(self):
+        if not self.technologies:
+            return []
+        return [t.strip() for t in self.technologies.split(",") if t.strip()]
+
+
+class SavedService(models.Model):
+    """Client wishlist / bookmark for freelancer services."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="saved_services",
+    )
+    service = models.ForeignKey(
+        Service,
+        on_delete=models.CASCADE,
+        related_name="saved_by_users",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "service"],
+                name="unique_saved_service_per_user",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} saved {self.service.title}"

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Client Reviews & Ratings — SkillSphere{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <div class="text-center max-w-2xl mx-auto mb-12">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 mb-3">
+            Verified Milestone Feedback
+        </span>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Trust & Quality Guaranteed</h1>
+        <p class="text-slate-500 mt-2 text-sm">Every review on SkillSphere is tied to a completed, escrow-funded contract. Read real client and developer testimonials.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for r in reviews %}
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between">
+            <div>
+                <!-- Stars -->
+                <div class="flex items-center space-x-1 text-amber-400 mb-3">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= r.rating %}
+                            <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                        {% else %}
+                            <i data-lucide="star" class="w-4 h-4 text-slate-200"></i>
+                        {% endif %}
+                    {% endfor %}
+                    <span class="text-xs font-bold text-slate-700 ml-1.5">{{ r.rating }}.0</span>
+                </div>
+
+                <p class="text-xs text-slate-700 leading-relaxed italic mb-4">"{{ r.comment }}"</p>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs text-slate-700">
+                        {{ r.reviewer.get_display_name|slice:":1" }}
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-slate-900 block">{{ r.reviewer.get_display_name }}</span>
+                        <span class="text-[10px] text-slate-400">Reviewed {{ r.reviewee.get_display_name }}</span>
+                    </div>
+                </div>
+
+                <!-- Report Flag -->
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'reviews:report_review' review_id=r.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="text-slate-400 hover:text-rose-500 p-1" title="Flag review for moderation">
+                        <i data-lucide="flag" class="w-3.5 h-3.5"></i>
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-16 bg-white rounded-2xl border border-slate-200">
+            <i data-lucide="star" class="w-12 h-12 text-slate-300 mx-auto mb-3"></i>
+            <h3 class="text-base font-bold text-slate-800">No public reviews yet</h3>
+            <p class="text-xs text-slate-500 mt-1">Once orders are approved, reviews will appear here automatically.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

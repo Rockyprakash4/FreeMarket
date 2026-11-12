@@ -6,11 +6,11 @@ from .models import Profile
 User = get_user_model()
 
 
-class DevMarketRegistrationForm(UserCreationForm):
+class SkillSphereRegistrationForm(UserCreationForm):
     role = forms.ChoiceField(
         choices=[
-            (User.Role.FREELANCER, "Freelancer / Developer — I want to find work"),
-            (User.Role.CLIENT, "Client / Project Owner — I want to hire talent"),
+            (User.Role.FREELANCER, "Freelancer / Developer — I want to offer my technical skills & services"),
+            (User.Role.CLIENT, "Client / Project Owner — I want to hire talent & post projects"),
         ],
         widget=forms.RadioSelect(
             attrs={"class": "text-brand-600 focus:ring-brand-500"}
@@ -74,7 +74,7 @@ class DevMarketRegistrationForm(UserCreationForm):
         )
 
 
-class DevMarketLoginForm(AuthenticationForm):
+class SkillSphereLoginForm(AuthenticationForm):
     username = forms.CharField(
         widget=forms.TextInput(
             attrs={
@@ -94,54 +94,26 @@ class DevMarketLoginForm(AuthenticationForm):
 
 
 class UserProfileForm(forms.ModelForm):
-    first_name = forms.CharField(
-        max_length=50,
-        required=True,
-        widget=forms.TextInput(
-            attrs={
-                "class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm"
-            }
-        ),
-    )
-    last_name = forms.CharField(
-        max_length=50,
-        required=True,
-        widget=forms.TextInput(
-            attrs={
-                "class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm"
-            }
-        ),
-    )
-    email = forms.EmailField(
-        required=True,
-        widget=forms.EmailInput(
-            attrs={
-                "class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm"
-            }
-        ),
-    )
-    phone = forms.CharField(
-        required=False,
-        widget=forms.TextInput(
-            attrs={
-                "class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm",
-                "placeholder": "+1 (555) 000-0000",
-            }
-        ),
-    )
-    location = forms.CharField(
-        required=False,
-        widget=forms.TextInput(
-            attrs={
-                "class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm",
-                "placeholder": "e.g. San Francisco, CA or Remote",
-            }
-        ),
-    )
-
     class Meta:
         model = User
         fields = ("first_name", "last_name", "email", "phone", "location", "avatar")
+        widgets = {
+            "first_name": forms.TextInput(
+                attrs={"class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm"}
+            ),
+            "last_name": forms.TextInput(
+                attrs={"class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm"}
+            ),
+            "email": forms.EmailInput(
+                attrs={"class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm"}
+            ),
+            "phone": forms.TextInput(
+                attrs={"class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm", "placeholder": "+1 (555) 000-0000"}
+            ),
+            "location": forms.TextInput(
+                attrs={"class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm", "placeholder": "e.g. San Francisco, CA or Remote"}
+            ),
+        }
 
 
 class FreelancerProfileForm(forms.ModelForm):
@@ -157,6 +129,8 @@ class FreelancerProfileForm(forms.ModelForm):
             "portfolio_website",
             "github_url",
             "linkedin_url",
+            "resume",
+            "verification_document",
         )
         widgets = {
             "headline": forms.TextInput(
@@ -179,38 +153,62 @@ class FreelancerProfileForm(forms.ModelForm):
                 }
             ),
             "experience_level": forms.Select(
-                attrs={
-                    "class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm"
-                }
+                attrs={"class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm"}
             ),
             "hourly_rate": forms.NumberInput(
-                attrs={
-                    "class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm",
-                    "placeholder": "50.00",
-                }
+                attrs={"class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm", "placeholder": "50.00"}
             ),
             "availability": forms.Select(
-                attrs={
-                    "class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm"
-                }
+                attrs={"class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm"}
             ),
             "portfolio_website": forms.URLInput(
-                attrs={
-                    "class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm",
-                    "placeholder": "https://yourportfolio.dev",
-                }
+                attrs={"class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm", "placeholder": "https://yourportfolio.dev"}
             ),
             "github_url": forms.URLInput(
-                attrs={
-                    "class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm",
-                    "placeholder": "https://github.com/username",
-                }
+                attrs={"class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm", "placeholder": "https://github.com/username"}
             ),
             "linkedin_url": forms.URLInput(
-                attrs={
-                    "class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm",
-                    "placeholder": "https://linkedin.com/in/username",
-                }
+                attrs={"class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm", "placeholder": "https://linkedin.com/in/username"}
             ),
         }
 
+
+class PasswordResetRequestForm(forms.Form):
+    email = forms.EmailField(
+        label="Account Email Address",
+        widget=forms.EmailInput(
+            attrs={
+                "class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm",
+                "placeholder": "you@example.com",
+            }
+        ),
+    )
+
+
+class PasswordResetConfirmForm(forms.Form):
+    new_password = forms.CharField(
+        label="New Password",
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm",
+                "placeholder": "At least 8 characters",
+            }
+        ),
+    )
+    confirm_password = forms.CharField(
+        label="Confirm New Password",
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm",
+                "placeholder": "Re-enter new password",
+            }
+        ),
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        p1 = cleaned_data.get("new_password")
+        p2 = cleaned_data.get("confirm_password")
+        if p1 and p2 and p1 != p2:
+            raise forms.ValidationError("Passwords do not match.")
+        return cleaned_data

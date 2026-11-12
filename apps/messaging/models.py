@@ -39,6 +39,9 @@ class Message(models.Model):
         related_name="sent_messages",
     )
     content = models.TextField()
+    attachment = models.FileField(
+        upload_to="message_attachments/", blank=True, null=True
+    )
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

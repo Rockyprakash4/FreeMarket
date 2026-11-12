@@ -10,18 +10,16 @@ from notifications.models import Notification
 @login_required
 def create_review_view(request, order_id):
     order = get_object_or_404(
-        Order.objects.select_related("client", "freelancer", "project"),
+        Order.objects.select_related("client", "freelancer", "project", "service"),
         id=order_id,
     )
 
-    # Check that order is COMPLETED
     if order.status != Order.Status.COMPLETED:
         messages.warning(
             request, "Reviews can only be submitted for completed and approved orders."
         )
         return redirect("orders:order_detail", order_id=order.id)
 
-    # Determine reviewer and reviewee
     if request.user == order.client:
         reviewee = order.freelancer
     elif request.user == order.freelancer:
@@ -30,7 +28,6 @@ def create_review_view(request, order_id):
         messages.error(request, "You are not a participant in this order.")
         return redirect("core:dashboard")
 
-    # Check for existing review
     existing_review = Review.objects.filter(order=order, reviewer=request.user).first()
     if existing_review:
         messages.info(request, "You have already submitted a review for this order.")
@@ -41,6 +38,7 @@ def create_review_view(request, order_id):
         if form.is_valid():
             review = form.save(commit=False)
             review.order = order
+            review.service = order.service
             review.reviewer = request.user
             review.reviewee = reviewee
             review.save()
@@ -48,7 +46,7 @@ def create_review_view(request, order_id):
             Notification.objects.create(
                 recipient=reviewee,
                 title="New Review Received ⭐",
-                message=f"{request.user.get_display_name()} gave you a {review.rating}-star review for '{order.project.title}'.",
+                message=f"{request.user.get_display_name()} gave you a {review.rating}-star review for '{order.title}'.",
                 link_url=f"/orders/{order.id}/",
                 notification_type=Notification.NotificationType.REVIEW_RECEIVED,
             )
@@ -69,3 +67,20 @@ def create_review_view(request, order_id):
         "reviewee": reviewee,
     }
     return render(request, "reviews/create_review.html", context)
+
+
+@login_required
+def report_review_view(request, review_id):
+    review = get_object_or_404(Review, id=review_id)
+    if request.method == "POST":
+        review.is_reported = True
+        review.save(update_fields=["is_reported"])
+        messages.info(request, "Thank you. This review has been flagged for moderation review.")
+    return redirect(request.META.get("HTTP_REFERER", "core:home"))
+
+
+def review_list_view(request):
+    reviews = Review.objects.filter(is_reported=False).select_related(
+        "reviewer", "reviewee", "order"
+    ).order_by("-created_at")[:20]
+    return render(request, "reviews/review_list.html", {"reviews": reviews})

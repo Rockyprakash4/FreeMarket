@@ -1,5 +1,5 @@
 """
-URL configuration for DevMarket project.
+URL configuration for SkillSphere project.
 """
 
 from django.contrib import admin
@@ -18,6 +18,7 @@ urlpatterns = [
     path("", include("notifications.urls")),
     path("", include("reviews.urls")),
     path("", include("payments.urls")),
+    path("", include("disputes.urls")),
 ]
 
 if settings.DEBUG:

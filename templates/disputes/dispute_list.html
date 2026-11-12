@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Dispute Center — SkillSphere{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-slate-200">
+        <div>
+            <div class="flex items-center space-x-2">
+                <i data-lucide="scales" class="w-6 h-6 text-brand-600"></i>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Dispute Resolution Center</h1>
+            </div>
+            <p class="text-sm text-slate-500 mt-1">Track formal arbitration cases, contract dispute determinations, and escrow settlements.</p>
+        </div>
+
+        {% if user.is_staff %}
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
+            Staff Arbitration Mode
+        </span>
+        {% endif %}
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm mt-8 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                    <tr>
+                        <th class="px-6 py-4">Case ID</th>
+                        <th class="px-6 py-4">Order</th>
+                        <th class="px-6 py-4">Raised By</th>
+                        <th class="px-6 py-4">Reason</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4">Filed</th>
+                        <th class="px-6 py-4 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for d in disputes %}
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-4 font-mono text-xs font-bold text-slate-700">#{{ d.id|slice:":8" }}</td>
+                        <td class="px-6 py-4">
+                            <a href="{% url 'orders:order_detail' order_id=d.order.id %}" class="font-bold text-brand-600 hover:underline text-xs">
+                                {{ d.order.title|truncatechars:35 }}
+                            </a>
+                            <span class="block text-[11px] text-slate-400">${{ d.order.total_amount }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-xs text-slate-700">
+                            <strong>{{ d.raised_by.get_display_name }}</strong>
+                            <span class="text-slate-400 block text-[11px]">({{ d.raised_by.get_role_display }})</span>
+                        </td>
+                        <td class="px-6 py-4 text-xs font-medium text-slate-800">
+                            {{ d.get_reason_display }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold
+                                {% if d.status == 'open' %}bg-rose-100 text-rose-800
+                                {% elif d.status == 'under_review' %}bg-amber-100 text-amber-800
+                                {% elif d.status == 'resolved_refund' %}bg-purple-100 text-purple-800
+                                {% elif d.status == 'resolved_payout' %}bg-emerald-100 text-emerald-800
+                                {% else %}bg-slate-100 text-slate-700{% endif %}">
+                                {{ d.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-xs text-slate-500">{{ d.created_at|date:"M d, Y" }}</td>
+                        <td class="px-6 py-4 text-right">
+                            <a href="{% url 'disputes:dispute_detail' dispute_id=d.id %}" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-brand-600 text-white hover:bg-brand-700 transition-colors">
+                                View Case &rarr;
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center text-xs text-slate-400">
+                            <i data-lucide="check-circle" class="w-8 h-8 text-emerald-500 mx-auto mb-2"></i>
+                            No disputes filed. All platform contracts are proceeding normally.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
